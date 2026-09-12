@@ -4,6 +4,16 @@ A parent with root access. AMMA watches a study deadline, sends escalating email
 
 Built for Battle of the Schools by Sharma Ji Ka Bot: Vian Dhanda, Asad Ullah Qureshi and Aditya Vignesh Kumar.
 
+## Run the mock Instagram demo
+
+```sh
+npm run mock
+```
+
+Open http://127.0.0.1:3000. This starts a fresh 90-second simulation with offline Calendar/email and a local mock Instagram. It uses `photos/aurafarmer.jpg` by default; set `HOSTAGE_PHOTO` for another JPEG/PNG. At Armed, open the mock from the dashboard to see the actual photo and generated caption. “Share in mock only” saves a simulated post locally. No Instagram login, Steel credits or external API calls are used. The terminal prints the exact release command. Ctrl+C stops the server.
+
+The mock is a replacement demo integration, not proof of real Instagram automation or a Steel Computer checkpoint. Drafts persist locally; release cancels unshared drafts.
+
 ## Run the offline demo
 
 Requires Node.js 20+ and npm. From the repository root:
@@ -59,12 +69,13 @@ npx tsc --noEmit
 npx tsx src/scripts/verify.ts
 npx tsx src/scripts/verify-cs.ts
 npx tsx src/scripts/verify-ee.ts
+npx tsx src/scripts/verify-mock.ts
 ```
 
-The EE test requires Playwright Chromium or installed macOS Chrome. `npx tsx src/scripts/record-demo.ts` records an isolated offline run and requires Playwright FFmpeg (`npx playwright install ffmpeg`).
+The EE test requires Playwright Chromium or installed macOS Chrome. `npx tsx src/scripts/record-demo.ts` records an isolated offline run including the mock compose preview and requires Playwright FFmpeg (`npx playwright install ffmpeg`).
 
-- [Editable slides](artifacts/AMMA.pptx) and [PDF](artifacts/AMMA.pdf)
-- [Offline rehearsal video](artifacts/AMMA_offline_rehearsal.webm)
+- [Editable slides with current demo notes](artifacts/AMMA_mock.pptx) and [PDF](artifacts/AMMA.pdf)
+- [Mock rehearsal video](artifacts/AMMA_mock_rehearsal.webm)
 - [Detailed setup, recovery and current verification status](UTWAT_Master_doc.md)
 
-Verified September 12: all local suites and full offline escalation/release pass; a real Google email and temporary Calendar event create/rename/restore/delete check passed. OpenRouter generation succeeded using a free model. Steel Browser launched successfully. Instagram authentication/compose, Steel Computer deployment and checkpoint restores are still pending. Devpost work is deferred by the team.
+Verified September 12: all local suites and full offline escalation/release pass; a real Google email and temporary Calendar event create/rename/restore/delete check passed. OpenRouter generation succeeded using a free model. Steel Browser launched successfully. Local mock composition, simulated sharing and cancellation are implemented and tested. Real Instagram authentication/compose, Steel Computer deployment and checkpoint restores are still pending. Devpost work is deferred by the team.

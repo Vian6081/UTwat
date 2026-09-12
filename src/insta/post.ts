@@ -6,6 +6,8 @@ import { config } from "../config";
 import { offline } from "../google/auth";
 import { loadState } from "../state";
 
+import { mockEnabled, armMock, cancelMock } from "./mock";
+
 let activeSession: string | undefined;
 let composeInFlight: Promise<{sessionId: string; liveViewUrl: string}> | undefined;
 function steelClient() {
@@ -73,6 +75,7 @@ export async function prepareCompose(page: Page, photoPath: string, caption: str
   // Deliberately stop here. This function has no Share click.
 }
 export async function armCompose(photoPath: string, caption: string): Promise<{sessionId: string; liveViewUrl: string}> {
+  if (mockEnabled()) return armMock(photoPath, caption);
   if (offline()) return {sessionId:"offline-session",liveViewUrl:"about:blank"};
   if (composeInFlight) return composeInFlight;
   const state=loadState();
@@ -118,6 +121,7 @@ export async function armCompose(photoPath: string, caption: string): Promise<{s
 }
 export async function cancelCompose(sessionId?: string): Promise<void> {
   const id=sessionId || activeSession || loadState().runtime?.armed?.sessionId;
+  if(id?.startsWith("mock-")){await cancelMock(id);return;}
   if(!id || id.startsWith("offline-") || offline()){activeSession=undefined;return;}
   const steel=steelClient();
   try {
@@ -130,6 +134,7 @@ export async function cancelCompose(sessionId?: string): Promise<void> {
   }
 }
 export async function fireNow(): Promise<void> {
+  if(mockEnabled())throw new Error("Use the local mock page for simulated sharing");
   if(config.demoMode || !config.autoSend || offline())throw new Error("Instagram sending is disabled. A human controls the final button in the demo.");
   const state=loadState();
   if(state.done || state.stage==="released")throw new Error("Released work cannot be posted");

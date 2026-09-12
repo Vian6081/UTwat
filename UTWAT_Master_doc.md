@@ -610,3 +610,13 @@ Vian authorized completing the remaining setup without spending money, then sepa
 - Event submission page found: https://battle-of-the-schools.devpost.com/. Team registration: https://forms.gle/8jDCNgBJJcedAVai6. Vian is admitted; teammates are Asad Ullah Qureshi and Aditya Vignesh Kumar. No form or Devpost submission made.
 
 `README.md` now documents an explicitly offline default rehearsal, live setup, recovery and verified limitations. Google credential files remain local/ignored; the downloaded JSON has owner-only permissions.
+
+## Mock demo handoff — September 12, 2026
+
+This section supersedes the earlier pending account notes. Google Calendar/Gmail and free OpenRouter calls were verified live. Steel Browser and its private API key work, but Instagram rejected sign-in; profile persistence and real compose remain unverified. The failed login session was released. Vian requested a mock substitute.
+
+Run `npm run mock`. The launcher creates a fresh private state directory, starts the dashboard, and runs the full 18-hour escalation in about 90 seconds. Open http://127.0.0.1:3000. At Armed, open the mock Instagram link. The actual selected photo and generated caption are stored as a local draft. The clearly labeled mock Share saves only a local simulated post. The agent never presses real Instagram Share. The launcher prints an exact mark-done command; release cancels an unshared mock draft. Ctrl+C stops the local demo server. This mode makes no external API requests and spends no credits.
+
+`src/scripts/verify-mock.ts` tests local composition, literal caption rendering, simulated sharing, cross-origin write rejection, cancellation, released-state protection and mobile layout. The runtime, CS and EE suites also pass. `artifacts/AMMA_mock_rehearsal.webm` records full escalation, the mock photo/caption preview, and release. `artifacts/mock-instagram.png` captures the prepared mock. `artifacts/AMMA_mock.pptx` updates presentation notes for this demo; the earlier PDF has the same visible slides, with older presenter notes in the original PPTX.
+
+Remaining real-world work: Steel Computer beta access, an actual overnight run and two whole-computer checkpoint restores, second-laptop rehearsal/copy, and deferred Devpost/team registration. A local JSON draft surviving a restart is not proof of a whole-computer checkpoint. No billing purchases or real Instagram posts were made. No credentials are included in demo artifacts.

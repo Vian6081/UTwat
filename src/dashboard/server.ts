@@ -4,6 +4,8 @@ import * as fs from "node:fs";
 import { now } from "../clock";
 import { loadState, STATE_PATH } from "../state";
 
+import { mockRouter, mockEnabled } from "../insta/mock";
+
 export function createDashboard() {
   const app=express();
   app.disable("x-powered-by");
@@ -13,6 +15,7 @@ export function createDashboard() {
     res.setHeader("Content-Security-Policy","default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'");
     next();
   });
+  app.use("/mock-instagram",mockRouter());
   app.get("/",(_req,res)=>res.sendFile(path.resolve(__dirname,"index.html")));
   app.get("/api/state",(_req,res)=>{
     try {
@@ -29,6 +32,7 @@ export function createDashboard() {
         drafts:state.drafts,emailsSent:state.emailsSent,mutations:state.mutations,lastCheckISO:state.lastCheckISO,
         nowISO:current.toISOString(),clockSpeed:state.runtime?.simClock?.speed || 1,
         mode:state.runtime?.integrationMode || (process.env.AMMA_OFFLINE==="true"?"offline":"live"),
+        instagramMode:mockEnabled()?"mock":"steel",
         simulation:!!state.runtime?.sim,initialized:fs.existsSync(STATE_PATH),
         photoReady:!!state.hostagePhoto && fs.existsSync(state.hostagePhoto),
         liveViewUrl:safeLiveView(state.runtime?.armed?.liveViewUrl),
@@ -40,6 +44,7 @@ export function createDashboard() {
   return app;
 }
 export function safeLiveView(value?: string): string | null {
+  if(mockEnabled() && value==="/mock-instagram")return value;
   if(!value)return null;
   try{const url=new URL(value);return url.protocol==="https:" && (url.hostname==="steel.dev" || url.hostname.endsWith(".steel.dev")) && !url.username && !url.password && !url.search ? url.toString():null;}
   catch{return null;}

@@ -11,7 +11,7 @@ import { CalendarEvent, Stage } from "./types";
 
 export const defaultServices = { ...calendar, ...roast, sendNag, cancelCompose,
   armCompose: async (photo: string, caption: string) => {
-    if (offline()) { console.log("[offline] Compose prepared; no browser opened."); return { sessionId: "offline-session", liveViewUrl: "about:blank" }; }
+    if (offline() && process.env.AMMA_INSTAGRAM_MODE!=="mock") { console.log("[offline] Compose prepared; no browser opened."); return { sessionId: "offline-session", liveViewUrl: "about:blank" }; }
     return armCompose(photo, caption);
   },
 };
