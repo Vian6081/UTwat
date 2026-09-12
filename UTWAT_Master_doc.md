@@ -445,7 +445,7 @@ npm run undo-all
 npm run arm
 ```
 
-The deadline example is not applied automatically. `undo-all` restores current changes but does not stop future escalation; `mark-done` releases permanently. Arming is idempotent for one state file. Existing armed sessions need to be closed manually when work is released: EE's frozen interface has no `cancelCompose` function.
+The deadline example is not applied automatically. `undo-all` restores current changes but does not stop future escalation; `mark-done` releases permanently. Arming is idempotent for one state file. EE now adds an optional `cancelCompose` export. `mark-done` releases the armed session and restores Calendar; failed closure retains the recovery entry for retry.
 
 A fresh simulation uses a separate state file to preserve live history. Use a new filename for every run, and the same path for both processes:
 
@@ -456,7 +456,7 @@ AMMA_OFFLINE=true AMMA_STATE_PATH=/tmp/amma-demo-1.json npm run undo-all
 AMMA_OFFLINE=true AMMA_STATE_PATH=/tmp/amma-demo-1.json npm run mark-done
 ```
 
-Simulation accelerates the clock by 720 times, so 18 hours takes about 90 seconds. It uses the installed integrations: Google/OpenRouter calls are live unless AMMA_OFFLINE=true; Instagram is still pending EE integration. These commands can have real external effects. It refuses to reset an existing state file. The dashboard uses the same simulated epoch through `now()`. Free blocks are limited to the calendar day visible through `listEventsToday`; fewer than two are possible if the day has insufficient free time.
+Simulation accelerates the clock by 720 times, so 18 hours takes about 90 seconds. It uses the installed integrations: Google/OpenRouter calls are live unless AMMA_OFFLINE=true; Instagram now uses the EE compose integration in live mode. These commands can have real external effects. It refuses to reset an existing state file. The dashboard uses the same simulated epoch through `now()`. Free blocks are limited to the calendar day visible through `listEventsToday`; fewer than two are possible if the day has insufficient free time.
 
 ### Live auth and deployment
 
@@ -490,9 +490,9 @@ Before resolving any `runtime.actions` entry marked `pending`, inspect the corre
 
 CS handoff (updated): Google auth/calendar/email and roast modules are now implemented. Live verification awaits credentials; see the CS setup section. Preserve the shared signatures. Calendar event start/end must be ISO datetimes with the calendar's timezone; propagate Google 404/410 on missing delete targets. The loop journals renames, but an insertion interrupted before its ID returns requires reconciliation because the frozen insertion interface accepts no idempotency key.
 
-EE handoff: profile verification will supply STEEL_PROFILE_ID after credentials arrive. `armCompose` must return a live session without pressing Send. Optional `runtime.armed` contains the returned session ID/live URL. Release clears local drafts, but the already armed cloud browser needs manual closing until an explicit cancel interface is agreed. For simulation, launch the dashboard with the same AMMA_STATE_PATH as the loop.
+EE handoff: profile verification will supply STEEL_PROFILE_ID after credentials arrive. `armCompose` must return a live session without pressing Send. Optional `runtime.armed` contains the returned session ID/live URL. Release clears local drafts and closes the armed browser through the additional `cancelCompose` interface. For simulation, launch the dashboard with the same AMMA_STATE_PATH as the loop.
 
-No Discord messages were sent. Main merges remain at team sync points. Devpost submission, registration, live overnight run, checkpoint capture and two restores, video/slides, and in-person rehearsals remain pending the team's integrations/access and event readiness.
+No Discord messages were sent. Main merges remain at team sync points. Devpost submission, registration, live overnight run, checkpoint capture and two restores, the live integration video, and in-person rehearsals remain pending the team's integrations/access and event readiness.
 
 ### Verification recorded in this task
 
@@ -563,3 +563,36 @@ The AMMA Google Cloud project was created (`striped-century-508420-b6`). Calenda
 OpenRouter account setup is complete. The AMMA Hackathon API key is saved in the ignored local `.env`, with a seven-day expiry and a US$5 lifetime cap; no funds were added, and the application is configured for `nvidia/nemotron-3-super-120b-a12b:free`. A real structured email-generation request succeeded with HTTP 200 and reported cost 0. An unused default key created automatically by onboarding was disabled. The free model can be rate limited; the generation module logs its fallback if that happens. Key values are never included in this document.
 
 The offline CS milestone and full 90-second ladder passed, reaching fired with 16 email records in the separate offline state. The live Google milestone remains pending OAuth credential creation and the account owner's consent.
+
+
+## EE implementation handoff — September 12, 2026
+
+Branch `ee` includes Vian and CS work without merging main. Vian authorized all three roles. Frozen types/config are unchanged.
+
+- `src/insta/login.ts`: manual login via the Steel viewer, release/reopen profile proof, then atomic private `.env` profile-ID save. Uses the authorized personal Instagram account; no password is collected by AMMA.
+- `src/insta/post.ts`: attach through Steel CDP, upload a local JPEG/PNG as a remote file buffer, advance through Next, fill/verify the complete caption, and leave Share enabled for the human. The loop never calls `fireNow`; demo defaults reject that function. Successful compose sessions stay open. `mark-done` releases the session and restores Calendar even when closure fails; closure failures retain recovery state for retry.
+- Dashboard: one static responsive HTML page with shared-clock countdown, five-stage ladder, caption preview, Calendar/email/study totals, recent activity, fullscreen control and a validated Steel viewer link. Offline mode is labeled and hides the viewer. Connection failure pauses the timer. The JSON endpoint omits photo paths, session IDs and action-journal keys; server binds to localhost by default.
+- Seven-slide editable deck: `artifacts/AMMA.pptx`. PDF copy: `artifacts/AMMA.pdf`. Dark background, one accent, one font, 30pt minimum, speaker notes and rehearsal cues. The three wildcard points are on slide 6; their full original wording is in the notes to preserve large type. Cloud deployment, overnight and checkpoint claims are clearly marked pending.
+- `artifacts/AMMA_offline_rehearsal.webm` records the actual dashboard during a full 90-second accelerated simulation plus release. This is an OFFLINE rehearsal, not evidence of live Google/Instagram or a Steel Computer checkpoint. `artifacts/dashboard.png` is the rehearsal dashboard at the deadline.
+
+Verification:
+
+```bash
+npx tsc --noEmit
+npx tsx src/scripts/verify.ts
+npx tsx src/scripts/verify-cs.ts
+npx tsx src/scripts/verify-ee.ts
+```
+
+EE tests use an isolated browser fixture and temporary state. They check upload bytes, full caption retention, zero Share clicks, unexpected-origin rejection, sending disabled, state redaction, mobile overflow, connection failure and release display. The loop suite also checks failed browser closure, Calendar restoration despite closure failure, and successful retry. Fixture success does not prove current Instagram selectors or profile persistence against the live service.
+
+Run a new offline rehearsal in two terminals using the SAME fresh state path:
+
+```bash
+AMMA_OFFLINE=true AMMA_STATE_PATH=/tmp/amma-ee-rehearsal-new.json HOSTAGE_PHOTO=photos/aurafarmer.jpg npm run sim
+AMMA_OFFLINE=true AMMA_STATE_PATH=/tmp/amma-ee-rehearsal-new.json npm run dash
+```
+
+Open http://127.0.0.1:3000. To record another rehearsal, `npx tsx src/scripts/record-demo.ts` creates isolated state under ignored photos/ and replaces the local rehearsal video. Playwright Chromium, or installed macOS Chrome, and Playwright FFmpeg are required. The recorder does not use the user's signed-in browser profile.
+
+Still required for the live demo: Steel API key and profile verification; Google OAuth credential creation approval, user consent and live smoke test; Steel Computer preview access, overnight run and two checkpoint restores; team registration/submission access and a second physical laptop. No purchases, billing setup, messages to teammates or Instagram posts were made. The slides and rehearsal can be copied to the second laptop when it is available.

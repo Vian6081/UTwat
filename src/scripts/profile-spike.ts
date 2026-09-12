@@ -3,7 +3,7 @@ import { chromium } from "playwright";
 import { createInterface } from "node:readline/promises";
 import { config } from "../config";
 
-async function main() {
+export async function runProfileSpike(): Promise<{profileId: string}> {
   if (!config.steelApiKey) throw new Error("STEEL_API_KEY is missing. Configure it locally in .env; never paste it into chat.");
   if (!process.stdin.isTTY) throw new Error("Run in an interactive terminal; login is manual in Steel's viewer.");
   const steel = new Steel({ steelAPIKey: config.steelApiKey });
@@ -43,9 +43,10 @@ async function main() {
     if (answer.trim().toLowerCase() !== "yes") throw new Error("Visual login confirmation not completed");
     console.log(`Profile persistence verified. Save STEEL_PROFILE_ID=${first.profileId} locally and hand the profile ID to EE.`);
     console.log('EE snippet: await steel.sessions.create({ profileId: config.steelProfileId, persistProfile: true });');
+    return {profileId:first.profileId};
   } finally {
     input.close();
     if (sessionId) await steel.sessions.release(sessionId);
   }
 }
-if (require.main === module) main().catch(() => { console.error("[profile-spike] Unable to complete login verification. Check credentials and the live viewer; no secrets are logged."); process.exitCode = 1; });
+if (require.main === module) runProfileSpike().catch(() => { console.error("[profile-spike] Unable to complete login verification. Check credentials and the live viewer; no secrets are logged."); process.exitCode = 1; });

@@ -4,12 +4,12 @@ import { now, startSimulation } from "./clock";
 import * as calendar from "./google/calendar";
 import { sendNag } from "./google/gmail";
 import { offline } from "./google/auth";
-import { armCompose } from "./insta/post";
+import { armCompose, cancelCompose } from "./insta/post";
 import * as roast from "./roast/generate";
 import { defaultState, loadState, runtime, RuntimeState, saveState, STATE_PATH, withStateLock } from "./state";
 import { CalendarEvent, Stage } from "./types";
 
-export const defaultServices = { ...calendar, ...roast, sendNag,
+export const defaultServices = { ...calendar, ...roast, sendNag, cancelCompose,
   armCompose: async (photo: string, caption: string) => {
     if (offline()) { console.log("[offline] Compose prepared; no browser opened."); return { sessionId: "offline-session", liveViewUrl: "about:blank" }; }
     return armCompose(photo, caption);
@@ -139,9 +139,12 @@ export async function tick(services: Services = defaultServices): Promise<Runtim
       console.log(`[amma] ${next} (${h.toFixed(2)}h left)`);
       if (next === "released") {
         state.drafts = []; saveState(state);
+        let cancelError: unknown;
+        try { await services.cancelCompose(runtime(state).armed?.sessionId); delete runtime(state).armed; saveState(state); }
+        catch (error) { cancelError = error; }
         await undoMutations(state, services);
-        // EE owns closing an already armed browser; shared interface has no cancelCompose.
-        await email(state, "email:released", next, h, services, "Work complete. Calendar restored. Do not publish any armed draft.");
+        if (cancelError) throw cancelError;
+        await email(state, "email:released", next, h, services, "Work complete. Calendar restored. Armed browser closed.");
       } else {
         if (next === "nudging") await studyBlocks(state, services);
         if (next === "invasive" || next === "hostile") await renameTargets(state, services, next, h);

@@ -21,6 +21,7 @@ const titles = new Map(events.map(e => [e.id, e.title]));
 const inserted: string[] = [];
 const services: import("../loop").Services = {
   ...defaultServices,
+  cancelCompose: async () => {},
   listEventsToday: async () => events.map(e => ({...e, title: titles.get(e.id)!})),
   generateEmail: async stage => ({ subject: stage, body: `at ${elapsed}` }),
   generateCaption: async stage => `caption:${stage}`,
@@ -63,6 +64,14 @@ async function main() {
   assert.equal(loadState().stage, "released"); assert.equal(loadState().drafts.length, 0);
   assert(loadState().mutations.every(m => m.undone)); assert.equal(titles.get("untitled"), "");
   assert.equal(sends, before + 1, "release email once");
+  fresh(); time(17.8); await tick(services);
+  const releaseState=loadState(); releaseState.done=true; saveState(releaseState);
+  const beforeRelease=sends;
+  await assert.rejects(tick({...services,cancelCompose:async()=>{throw new Error("close failed");}}),/close failed/);
+  assert(runtime(loadState()).armed,"failed close retains recovery session");
+  assert(loadState().mutations.every(m=>m.undone),"calendar restores even if browser close fails");
+  assert.equal(sends,beforeRelease,"no success email until browser closes");
+  await tick(services);assert.equal(runtime(loadState()).armed,undefined);assert.equal(sends,beforeRelease+1);
   fresh(); time(6); await tick(services); const first = sends;
   time(7); await tick(services); assert.equal(sends, first);
   time(8); await tick(services); assert.equal(sends, first + 1);
