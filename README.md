@@ -1,4 +1,4 @@
-# AMMA
+# The Deadline Hostage
 
 A parent with root access. AMMA watches a study deadline, sends escalating email reminders, reshapes your calendar and prepares an Instagram post. **A human controls the final Share.** Marking work done restores calendar changes, clears drafts and closes the prepared browser session.
 
