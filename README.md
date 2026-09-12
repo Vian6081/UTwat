@@ -1,0 +1,1 @@
+AMMA is an autonomous motivational management agent that takes your worst photos hostage and nags you toward a deadline like a parent with root access. It lives on Google Calendar, escalating from polite emails to renamed events to a loaded Instagram post it does not send. Run `npm i && npm run sim` to play the full 18-hour ladder in about 90 seconds.

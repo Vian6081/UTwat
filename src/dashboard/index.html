@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AMMA</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: #0b0b0d;
+      color: #f4f0ea;
+      font-family: Georgia, "Times New Roman", serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 2rem;
+    }
+    h1 { font-size: 1rem; letter-spacing: 0.4em; text-transform: uppercase; color: #c45c26; }
+    #countdown { font-size: clamp(4rem, 18vw, 12rem); font-weight: 700; line-height: 1; letter-spacing: -0.04em; }
+    #stage { font-size: 2.5rem; text-transform: uppercase; letter-spacing: 0.12em; }
+    .meta { display: flex; gap: 3rem; font-size: 1.25rem; color: #b7b0a6; }
+    #caption { max-width: 40rem; text-align: center; font-size: 1.15rem; color: #e8c9b0; }
+  </style>
+</head>
+<body>
+  <h1>AMMA</h1>
+  <div id="countdown">—</div>
+  <div id="stage">loading</div>
+  <div class="meta">
+    <div>hijacked: <span id="hijacked">0</span></div>
+    <div>emails: <span id="emails">0</span></div>
+  </div>
+  <p id="caption"></p>
+  <script>
+    function fmt(ms) {
+      if (ms <= 0) return "00:00:00";
+      const s = Math.floor(ms / 1000);
+      const h = String(Math.floor(s / 3600)).padStart(2, "0");
+      const m = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
+      const sec = String(s % 60).padStart(2, "0");
+      return h + ":" + m + ":" + sec;
+    }
+    async function tick() {
+      const res = await fetch("/api/state");
+      const data = await res.json();
+      const left = new Date(data.deadlineISO).getTime() - new Date(data.nowISO).getTime();
+      document.getElementById("countdown").textContent = fmt(left);
+      document.getElementById("stage").textContent = data.stage;
+      const hijacked = (data.mutations || []).filter(function (m) { return !m.undone; }).length;
+      document.getElementById("hijacked").textContent = String(hijacked);
+      document.getElementById("emails").textContent = String((data.emailsSent || []).length);
+      const draft = (data.drafts || [])[data.drafts.length - 1];
+      document.getElementById("caption").textContent = draft ? draft.caption : "";
+    }
+    tick();
+    setInterval(tick, 1000);
+  </script>
+</body>
+</html>

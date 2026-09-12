@@ -1,0 +1,28 @@
+{
+  "name": "amma",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AMMA — Autonomous Motivational Management Agent",
+  "scripts": {
+    "loop": "tsx src/loop.ts",
+    "sim": "tsx src/loop.ts --sim",
+    "undo-all": "tsx src/scripts/undo-all.ts",
+    "mark-done": "tsx src/scripts/mark-done.ts",
+    "arm": "tsx src/scripts/arm.ts",
+    "dash": "tsx src/dashboard/server.ts",
+    "insta-login": "tsx src/insta/login.ts"
+  },
+  "dependencies": {
+    "dotenv": "*",
+    "express": "*",
+    "googleapis": "*",
+    "playwright": "*",
+    "steel-sdk": "*"
+  },
+  "devDependencies": {
+    "@types/express": "*",
+    "@types/node": "*",
+    "tsx": "*",
+    "typescript": "*"
+  }
+}
