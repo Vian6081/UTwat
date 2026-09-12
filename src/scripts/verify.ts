@@ -75,9 +75,14 @@ async function main() {
   fresh(); time(6); await tick(services); const first = sends;
   time(7); await tick(services); assert.equal(sends, first);
   time(8); await tick(services); assert.equal(sends, first + 1);
+  fresh(); const short=loadState();short.deadlineISO=new Date(base+6*3_600_000).toISOString();saveState(short);
+  const insertBefore=inserted.length;const mailBefore=sends;await tick(services);
+  assert.equal(loadState().stage,"invasive");assert.equal(inserted.length,insertBefore+2,"six-hour start creates study blocks");
+  await tick(services);assert.equal(inserted.length,insertBefore+2,"restart does not duplicate blocks");assert.equal(sends,mailBefore+1);
+  await withStateLock(()=>undoMutations(loadState(),services));
   fresh(); time(12); failRename = true;
   await assert.rejects(tick(services));
-  assert.equal(loadState().mutations[0].originalTitle, "Friday drinks");
+  assert(loadState().mutations.some(m => m.originalTitle === "Friday drinks"), "rename recovery survives study-block catch-up");
   await assert.rejects(tick(services), /reconciliation/);
   failRename = false; const failed = loadState(); failed.done = true; saveState(failed);
   await tick(services); assert(loadState().mutations.every(m => m.undone));

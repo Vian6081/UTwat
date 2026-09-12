@@ -31,7 +31,7 @@ export function createDashboard() {
       ].sort((a,b)=>Date.parse(b.at)-Date.parse(a.at)).slice(0,25);
       // Explicit fields keep local file paths, recovery internals and credentials off the projector.
       res.json({ deadlineISO:state.deadlineISO,stage:state.stage,done:state.done,studyMinutesLogged:state.studyMinutesLogged,
-        drafts:state.drafts,emailsSent:state.emailsSent,mutations:state.mutations,lastCheckISO:state.lastCheckISO,
+        drafts:state.drafts,emailsSent:state.emailsSent,mutations:state.mutations.map(m=>({...m,scheduledStart:m.originalTitle===""&&m.newTitle==="STUDY BLOCK"?state.runtime?.studyPlan?.[state.mutations.filter(x=>x.originalTitle===""&&x.newTitle==="STUDY BLOCK").findIndex(x=>x.eventId===m.eventId)]:undefined})),lastCheckISO:state.lastCheckISO,
         nowISO:current.toISOString(),clockSpeed:state.runtime?.simClock?.speed || 1,
         mode:state.runtime?.integrationMode || (process.env.AMMA_OFFLINE==="true"?"offline":"live"),
         instagramMode:mockEnabled()?"mock":"steel",

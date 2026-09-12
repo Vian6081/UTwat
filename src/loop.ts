@@ -28,7 +28,7 @@ export function stageFor(h: number, done = false): Stage {
   return "calm";
 }
 function context(state: RuntimeState) {
-  return `emails ignored: ${state.emailsSent.length}; study minutes: ${state.studyMinutesLogged}; events: ${state.mutations.map(m => m.originalTitle || m.newTitle).join(", ")}`;
+  return `reminders sent: ${state.emailsSent.length} (read status unknown); study minutes: ${state.studyMinutesLogged}; events: ${state.mutations.map(m => m.originalTitle || m.newTitle).join(", ")}; study slots: ${(state.runtime?.studyPlan || []).map(start => new Date(start).toLocaleString("en-CA", {timeZone: process.env.GOOGLE_TIME_ZONE || "America/Toronto", hour: "2-digit", minute: "2-digit", month: "short", day: "numeric"}) + " (60 min)").join(", ") || "none scheduled"}; deadline: ${state.deadlineISO}`;
 }
 // A pending action may have succeeded remotely. Never blindly repeat an uncertain side effect.
 async function once(state: RuntimeState, key: string, work: () => Promise<void>) {
@@ -72,7 +72,7 @@ async function studyBlocks(state: RuntimeState, services: Services) {
   // Persist the plan before creating anything so restart uses identical action keys.
   const actions = runtime(state).actions;
   const planned = runtime(state).studyPlan ||= freeStudySlots(
-    await services.listEventsToday(), now().getTime() + 30 * 60_000,
+    await services.listEventsToday(), Math.ceil((now().getTime() + 30 * 60_000) / (30 * 60_000)) * (30 * 60_000),
     // listEventsToday cannot guarantee tomorrow's availability.
     Math.min(Date.parse(state.deadlineISO), new Date(now().getFullYear(), now().getMonth(), now().getDate() + 1).getTime()));
   saveState(state);
@@ -146,7 +146,8 @@ export async function tick(services: Services = defaultServices): Promise<Runtim
         if (cancelError) throw cancelError;
         await email(state, "email:released", next, h, services, "Work complete. Calendar restored. Armed browser closed.");
       } else {
-        if (next === "nudging") await studyBlocks(state, services);
+        // A short run can enter invasive directly; still create its study plan.
+        if (["nudging", "invasive", "hostile"].includes(next)) await studyBlocks(state, services);
         if (next === "invasive" || next === "hostile") await renameTargets(state, services, next, h);
         const caption = await draft(state, next, services);
         if (next === "armed" || next === "fired") await armState(state, services);

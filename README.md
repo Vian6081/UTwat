@@ -1,8 +1,12 @@
-# The Deadline Hostage
+# AMMA
 
 A parent with root access. AMMA watches a study deadline, sends escalating email reminders, reshapes your calendar and prepares an Instagram post. **A human controls the final Share.** Marking work done restores calendar changes, clears drafts and closes the prepared browser session.
 
 Built for Battle of the Schools by Sharma Ji Ka Bot: Vian Dhanda, Asad Ullah Qureshi and Aditya Vignesh Kumar.
+
+## Current live run and presentation
+
+The private Steel dashboard is at http://127.0.0.1:3004/. It uses Vian’s exported Claude design. **Replay 18h in 30s** is an isolated presentation animation; it never sends real mail or changes Calendar. The live six-hour overnight run started September 12 at 19:39 Toronto and ends September 13 at 01:39 Toronto. Two real study blocks and a new Gmail reminder have been verified; completion of the six-hour run is still pending. See `artifacts/STEEL_HANDOFF.md` for the current evidence and operating details.
 
 ## Run the mock Instagram demo
 

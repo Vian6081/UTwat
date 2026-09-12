@@ -1,4 +1,4 @@
-# The Deadline Hostage dashboard
+# AMMA dashboard
 
 Layout, typography, stage palette, vault, calendar rows, event log and notification cards adapted directly from Vian's Claude Design export, `Deadline Hostage.dc.html` (exported September 12, 2026). The original archive remains in Downloads as `Deadline hostage dashboard redesign.zip`.
 

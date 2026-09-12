@@ -94,9 +94,9 @@ export async function insertStudyBlock(startISO: string, minutes: number): Promi
   const api = await service();
   try {
     const result = await api.events.insert({ calendarId: calendarId(), sendUpdates: "none", requestBody: {
-      summary: "STUDY BLOCK", description: "AMMA study time. Restorable with npm run undo-all.",
+      summary: "STUDY BLOCK", description: "AMMA focus session: put your phone away, work through one topic, then test yourself without notes. Mark work done in the AMMA dashboard to release the session and restore calendar changes.",
       start: { dateTime: new Date(start).toISOString() }, end: { dateTime: end },
-      extendedProperties: { private: { amma: "study-block" } }, reminders: { useDefault: false },
+      extendedProperties: { private: { amma: "study-block" } }, reminders: { useDefault: false, overrides: [{method: "popup", minutes: 10}, {method: "popup", minutes: 0}] },
     } }, requestOptions);
     if (!result.data.id) throw new Error("Missing event ID");
     return result.data.id;

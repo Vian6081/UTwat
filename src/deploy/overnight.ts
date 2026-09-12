@@ -10,7 +10,7 @@ async function main() {
   delete process.env.SIM;
   if (fs.existsSync(receipt) || fs.existsSync(process.env.AMMA_STATE_PATH)) throw Error('Existing overnight evidence must be preserved; refusing a duplicate run');
   const startedAt = new Date().toISOString();
-  process.env.DEADLINE_ISO = new Date(Date.now() + 18 * 3_600_000).toISOString();
+  process.env.DEADLINE_ISO = new Date(Date.now() + 6 * 3_600_000).toISOString();
   const { tick } = await import('../loop');
   const { saveState, withStateLock } = await import('../state');
   let ticks = 0;

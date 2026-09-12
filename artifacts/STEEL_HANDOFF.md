@@ -62,3 +62,15 @@ Vian explicitly selected real Gmail/Calendar. The live agent now runs there with
 Private viewer: http://127.0.0.1:3004. The Mac relays the UI over Steel SSH; agent execution and data reside in `/work/amma` on the cloud computer. Live deadline is September 13 at 12:56 Toronto. A bounded local controller resumes this same computer after automatic pauses. It needs the Mac to stay open/connected and future resumes remain subject to beta availability. Its receipt is `photos/cloud-watch-receipt.json`. This is separate from the earlier local simulated endurance run.
 
 Source scripts: `cloud-run.ts`, `stdio-http.cjs`, `cloud-view.cjs`, `cloud-watch.cjs` in `src/deploy/`. TypeScript, EE and mock tests passed. The live relay rejected cross-origin release requests and unexpected Host headers with HTTP 403. The original saved checkpoint remains unchanged and its restoration remains unverified. No new checkpoint containing live credentials or Google actions was created.
+
+## September 12, 2026 — AMMA six-hour live overnight run
+
+User requested the AMMA name and the original Claude layout. The dashboard now uses the exported HTML/CSS, fonts, stage palette, vault, calendar rows and notification cards. The separate presentation replay still compresses 18 hours into 30 seconds and makes no provider writes.
+
+The existing Steel session was changed once at 19:39:35 Toronto time to a six-hour deadline: September 13 at 01:39:35 Toronto (05:39:35 UTC). Original state was backed up before the change; the original 18-hour offline endurance process was stopped and its evidence marked superseded, not passed. The controller receipt now uses the six-hour deadline.
+
+Live Google verification at 19:40 Toronto confirmed two STUDY BLOCK events: 20:30–21:30 and 21:30–22:30 on September 12. Each has popup reminders at ten minutes before and at its start. Gmail acknowledged the new reminder “Beta, your calendar is lying to us both” at 19:40:01. The full private receipt, including Google event links, is `photos/six-hour-google-proof.json` on the Mac and on Steel. This is evidence of successful initial integration actions, not evidence that six hours have already completed.
+
+A six-hour start enters the invasive stage. The loop now catches up study-block creation when a run starts in invasive or hostile, retaining its normal idempotency and undo records. Reminders run hourly in invasive and every twenty minutes in hostile, plus stage-transition messages. Share remains human-controlled. Use the private dashboard at http://127.0.0.1:3004/ to inspect activity; do not mark real work done during presentation unless the session should actually be released.
+
+Validation: TypeScript, runtime recovery/cadence (including six-hour catch-up and no duplicate blocks), Google/OAuth unit checks, desktop/mobile dashboard checks, and the complete 30-second replay with zero POST requests and unchanged state passed.
