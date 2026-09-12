@@ -13,7 +13,7 @@ async function main(){
  try{
  const page=await browser.newPage();await page.goto(origin+draft.liveViewUrl);await page.getByText('Test caption',{exact:false}).waitFor();assert.equal(await page.locator('#caption img').count(),0);
  assert.equal((await fetch(origin+'/mock-instagram/share',{method:'POST',headers:{'Content-Type':'application/json',Origin:'http://evil.example'},body:JSON.stringify({id:draft.sessionId})})).status,403);
- await page.getByRole('button',{name:'Share in mock only'}).click();await page.getByText('Simulated post saved. Nothing was sent to Instagram.').waitFor();
+ await page.getByRole('button',{name:'Review draft'}).click();await page.getByRole('button',{name:'Share in mock only'}).click();await page.getByText('Simulated post saved. Nothing was sent to Instagram.').waitFor();
  assert.equal((await (await fetch(origin+'/mock-instagram/state')).json()).status,'posted');
  await cancelCompose(draft.sessionId);assert.equal((await (await fetch(origin+'/mock-instagram/state')).json()).status,'posted');
  fs.unlinkSync(process.env.AMMA_STATE_PATH+'.instagram.json');const second=await armCompose(path.resolve('photos/aurafarmer.jpg'),'Cancellation test');await cancelCompose(second.sessionId);assert.equal((await fetch(origin+'/mock-instagram/photo')).status,404);

@@ -79,3 +79,11 @@ The EE test requires Playwright Chromium or installed macOS Chrome. `npx tsx src
 - [Detailed setup, recovery and current verification status](UTWAT_Master_doc.md)
 
 Verified September 12: all local suites and full offline escalation/release pass; a real Google email and temporary Calendar event create/rename/restore/delete check passed. OpenRouter generation succeeded using a free model. Steel Browser launched successfully. Local mock composition, simulated sharing and cancellation are implemented and tested. Real Instagram authentication/compose, Steel Computer deployment and checkpoint restores are still pending. Devpost work is deferred by the team.
+
+## Hosted Instagram-style demo
+
+Private deployment: https://amma-instagram-vian.ironyman.chatgpt.site
+
+The hosted mock follows the supplied dark Instagram desktop reference and supports a compose dialog, editable demo caption, local simulated sharing, likes, comments, saves and follow toggles. It has no real Instagram connection. The hosted draft is stored in that browser only; it is separate from the local AMMA loop. Sites usage is included within existing plan-specific public-beta limits; no paid APIs, domain, database or billing purchase was added.
+
+Hosted source is in `/Users/viandhanda/amma-instagram-site`; its `.openai/hosting.json` owns the existing Site registration. Reuse that registration for updates. The local loop uses `src/insta/mock.html` with its existing mock API. For the standalone deployment, that same HTML has `window.AMMA_STANDALONE=true` inserted before the application script and uses the selected photo as `dist/photo.jpg`. Credentials and AMMA runtime state are excluded. The earlier rehearsal video predates this visual redesign.
