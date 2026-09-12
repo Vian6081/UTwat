@@ -419,7 +419,7 @@ The minimum shippable version: a script that runs the ladder in 90 seconds, send
 
 ### Completed locally
 
-Work is on branch `vian`; main has not been merged. Repo setup and installed dependencies were already present. CS and EE files were preserved.
+Vian work was pushed on branch `vian`. CS work continues on branch `cs`, based on `vian`; main has not been merged. Repo setup and installed dependencies were already present. CS and EE files were preserved.
 
 - Injectable fake clock, plus a persisted simulation epoch shared with the dashboard and scripts.
 - Atomic state replacement, serialized loop/script writes, validation, and preserved undo history.
@@ -450,13 +450,13 @@ The deadline example is not applied automatically. `undo-all` restores current c
 A fresh simulation uses a separate state file to preserve live history. Use a new filename for every run, and the same path for both processes:
 
 ```sh
-AMMA_STATE_PATH=/tmp/amma-demo-1.json HOSTAGE_PHOTO="$PWD/photos/aurafarmer.jpg" npm run sim
-AMMA_STATE_PATH=/tmp/amma-demo-1.json npm run dash
-AMMA_STATE_PATH=/tmp/amma-demo-1.json npm run undo-all
-AMMA_STATE_PATH=/tmp/amma-demo-1.json npm run mark-done
+AMMA_OFFLINE=true AMMA_STATE_PATH=/tmp/amma-demo-1.json HOSTAGE_PHOTO="$PWD/photos/aurafarmer.jpg" npm run sim
+AMMA_OFFLINE=true AMMA_STATE_PATH=/tmp/amma-demo-1.json npm run dash
+AMMA_OFFLINE=true AMMA_STATE_PATH=/tmp/amma-demo-1.json npm run undo-all
+AMMA_OFFLINE=true AMMA_STATE_PATH=/tmp/amma-demo-1.json npm run mark-done
 ```
 
-Simulation accelerates the clock by 720 times, so 18 hours takes about 90 seconds. It uses the installed integrations: currently all external calls are stubs; after CS/EE integrate, these commands have real external effects. It refuses to reset an existing state file. The dashboard uses the same simulated epoch through `now()`. Free blocks are limited to the calendar day visible through `listEventsToday`; fewer than two are possible if the day has insufficient free time.
+Simulation accelerates the clock by 720 times, so 18 hours takes about 90 seconds. It uses the installed integrations: Google/OpenRouter calls are live unless AMMA_OFFLINE=true; Instagram is still pending EE integration. These commands can have real external effects. It refuses to reset an existing state file. The dashboard uses the same simulated epoch through `now()`. Free blocks are limited to the calendar day visible through `listEventsToday`; fewer than two are possible if the day has insufficient free time.
 
 ### Live auth and deployment
 
@@ -488,7 +488,7 @@ The supervisor runs the loop and dashboard on a machine with this repo, Node and
 
 Before resolving any `runtime.actions` entry marked `pending`, inspect the corresponding external service. For an uncertain study insertion, locate the event by its recorded start time and record its real ID in the mutation log before marking the action complete. If the external action did not happen, remove its pending entry only after confirming that fact. Never delete the whole state file to clear an error while calendar changes remain outstanding. Restore known calendar mutations with `undo-all`; it reports unresolved insertions and failed undos.
 
-CS handoff: Google auth/calendar/email and roast modules are still stubs. Preserve the shared signatures. Calendar event start/end must be ISO datetimes with the calendar's timezone; propagate Google 404/410 on missing delete targets. The loop journals renames, but an insertion interrupted before its ID returns requires reconciliation because the frozen insertion interface accepts no idempotency key.
+CS handoff (updated): Google auth/calendar/email and roast modules are now implemented. Live verification awaits credentials; see the CS setup section. Preserve the shared signatures. Calendar event start/end must be ISO datetimes with the calendar's timezone; propagate Google 404/410 on missing delete targets. The loop journals renames, but an insertion interrupted before its ID returns requires reconciliation because the frozen insertion interface accepts no idempotency key.
 
 EE handoff: profile verification will supply STEEL_PROFILE_ID after credentials arrive. `armCompose` must return a live session without pressing Send. Optional `runtime.armed` contains the returned session ID/live URL. Release clears local drafts, but the already armed cloud browser needs manual closing until an explicit cancel interface is agreed. For simulation, launch the dashboard with the same AMMA_STATE_PATH as the loop.
 
@@ -497,3 +497,69 @@ No Discord messages were sent. Main merges remain at team sync points. Devpost s
 ### Verification recorded in this task
 
 `npx tsc --noEmit` and `npx tsx src/scripts/verify.ts` passed. The 90-second stub simulation reached calm, nudging, invasive, hostile, armed and fired with 15 email records and exactly one compose call. No live messages, calendar changes, or Instagram posts occurred. Simulation evidence is local at `/tmp/amma-vian-sim-20260912.log`; the separate test state is `/tmp/amma-vian-sim-20260912.json`. Temporary files are not submission assets.
+
+
+## CS implementation and setup (current)
+
+Vian explicitly authorized completing CS's assigned files in this task. Shared types/config remain frozen. Google auth, Calendar, Gmail and OpenRouter generation are implemented on `cs`, along with verification and a reversible milestone check. Reminder destination is configured in the ignored local `.env`.
+
+### Google setup
+
+1. Sign into [Google Cloud Console](https://console.cloud.google.com/) with the chosen Gmail account. Create a project named AMMA. Enable **Google Calendar API** and **Gmail API** through APIs & Services → Library.
+2. Configure Google Auth Platform branding: app name AMMA; your email as support and developer contact. Audience: External; keep Testing mode and add your Gmail as a test user.
+3. Configure the two scopes: `https://www.googleapis.com/auth/calendar.events` and `https://www.googleapis.com/auth/gmail.send`.
+4. Create an OAuth client of type **Desktop app**, named AMMA Local. Store its client ID and secret in `.env`. For a Web application client instead, register `http://127.0.0.1:3001/oauth2callback` as the exact authorized redirect URI.
+5. Run `npx tsx src/google/auth.ts`. Open the printed consent URL, choose the test Gmail account and grant both scopes. The callback uses PKCE and state validation. It stores only the refresh token in `.env` with mode 0600, preserving other settings. No token is printed. Testing-mode refresh tokens may need reauthorization after the event.
+
+Required local variables:
+
+```dotenv
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REFRESH_TOKEN=
+GOOGLE_EMAIL=your-gmail-address@gmail.com
+GOOGLE_CALENDAR_ID=primary
+GOOGLE_TIME_ZONE=America/Toronto
+GOOGLE_REDIRECT_URI=http://127.0.0.1:3001/oauth2callback
+OPENROUTER_API_KEY=
+OPENROUTER_MODEL=nvidia/nemotron-3-super-120b-a12b:free
+DEMO_MODE=true
+AUTO_SEND=false
+```
+
+`GOOGLE_EMAIL` is the reminder destination; no extra Gmail read/profile scope is requested. If GOOGLE_TIME_ZONE is omitted, the calendar's timezone is obtained from events.list. Dates expand correctly across daylight-saving changes, including all-day events. Event listings are paginated and recurring occurrences are expanded. Calendar renames patch only summary and use sendUpdates=none; write failures propagate for the loop's recovery journal. Missing deletes preserve HTTP 404/410 for undo handling.
+
+### OpenRouter setup
+
+Sign in to [OpenRouter keys](https://openrouter.ai/settings/keys), create an AMMA key and store it as OPENROUTER_API_KEY. The default is a compatible free model. Vian requested no spending, so billing setup was skipped and no credits were purchased. OPENROUTER_MODEL can select another compatible free model. Generated responses are validated JSON; timeouts, malformed responses or provider outages produce a logged local wording fallback. A missing key is a configuration error rather than silently claiming a live model call.
+
+Prompts use stage, time remaining, ignored email count, study minutes and actual event titles. Event titles are treated as data, not instructions. The email body retains exact caption previews/diffs and the live URL supplied by the loop. Released messages are supportive, and generated copy must not claim automatic posting.
+
+### Verification and first milestone
+
+```sh
+npx tsc --noEmit
+npx tsx src/scripts/verify.ts
+npx tsx src/scripts/verify-cs.ts
+# Live: sends one reminder to GOOGLE_EMAIL and creates/renames/deletes its own temporary event.
+AMMA_STATE_PATH=/tmp/amma-google-live-check.json npx tsx src/scripts/google-smoke.ts
+# Offline: exercises the same milestone without external API calls.
+AMMA_OFFLINE=true AMMA_STATE_PATH=/tmp/amma-google-offline-check.json npx tsx src/scripts/google-smoke.ts
+```
+
+The live check logs the event's recovery data in its separate state file, restores the original title and deletes the temporary event. Repeating a completed check does not send another email. Use `AMMA_STATE_PATH=/tmp/amma-google-live-check.json npm run undo-all` for cleanup if interrupted; uncertain insertions require reconciliation as described above.
+
+AMMA_OFFLINE=true explicitly uses process-local calendar fixtures, logged emails and local roast wording; the loop also skips opening Instagram. Fixtures are a rehearsal aid, not durable calendar storage. State records whether integrations were offline or live and refuses mismatched mode reuse, preventing a rehearsal's undo IDs from being applied to a real calendar. The supervisor refuses offline mode.
+
+Verification covers the real SDK request construction via mock transport, DST and all-day event boundaries, pagination, error codes, Unicode MIME and header-injection rejection, OAuth callback/PKCE/private token persistence, OpenRouter response validation and fallback, plus the existing loop recovery suite. No successful live API call is claimed until account setup and the live milestone complete.
+
+Implementation references: [Google desktop OAuth](https://developers.google.com/identity/protocols/oauth2/native-app), [Calendar events.list](https://developers.google.com/calendar/api/v3/reference/events/list), [Gmail sending](https://developers.google.com/workspace/gmail/api/guides/sending), [OpenRouter chat API](https://openrouter.ai/docs/api/api-reference/chat/create-a-chat-completion).
+
+
+### Account setup progress
+
+The AMMA Google Cloud project was created (`striped-century-508420-b6`). Calendar and Gmail APIs are enabled. Google Auth Platform is configured as External/Testing; the requested Gmail account is added as a test user and only calendar.events and gmail.send are declared. Desktop credential creation is prepared as AMMA Local and awaits the requested confirmation.
+
+OpenRouter account setup is complete. The AMMA Hackathon API key is saved in the ignored local `.env`, with a seven-day expiry and a US$5 lifetime cap; no funds were added, and the application is configured for `nvidia/nemotron-3-super-120b-a12b:free`. A real structured email-generation request succeeded with HTTP 200 and reported cost 0. An unused default key created automatically by onboarding was disabled. The free model can be rate limited; the generation module logs its fallback if that happens. Key values are never included in this document.
+
+The offline CS milestone and full 90-second ladder passed, reaching fired with 16 email records in the separate offline state. The live Google milestone remains pending OAuth credential creation and the account owner's consent.

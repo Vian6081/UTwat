@@ -5,6 +5,8 @@ import { loadState, runtime } from "../state";
 
 export function preflight(): string[] {
   const issues: string[] = [];
+  if (process.env.AMMA_OFFLINE === "true") issues.push("AMMA_OFFLINE must be disabled for a live run");
+  if (!process.env.GOOGLE_EMAIL) issues.push("GOOGLE_EMAIL is missing");
   for (const [name, value] of Object.entries({ STEEL_API_KEY: config.steelApiKey, STEEL_PROFILE_ID: config.steelProfileId,
     OPENROUTER_API_KEY: config.openRouterApiKey, GOOGLE_CLIENT_ID: config.googleClientId,
     GOOGLE_CLIENT_SECRET: config.googleClientSecret, GOOGLE_REFRESH_TOKEN: config.googleRefreshToken })) {

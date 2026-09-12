@@ -3,12 +3,18 @@ import { EMAIL_INTERVAL_MS, STAGE_THRESHOLDS } from "./config";
 import { now, startSimulation } from "./clock";
 import * as calendar from "./google/calendar";
 import { sendNag } from "./google/gmail";
+import { offline } from "./google/auth";
 import { armCompose } from "./insta/post";
 import * as roast from "./roast/generate";
 import { defaultState, loadState, runtime, RuntimeState, saveState, STATE_PATH, withStateLock } from "./state";
 import { CalendarEvent, Stage } from "./types";
 
-export const defaultServices = { ...calendar, ...roast, sendNag, armCompose };
+export const defaultServices = { ...calendar, ...roast, sendNag,
+  armCompose: async (photo: string, caption: string) => {
+    if (offline()) { console.log("[offline] Compose prepared; no browser opened."); return { sessionId: "offline-session", liveViewUrl: "about:blank" }; }
+    return armCompose(photo, caption);
+  },
+};
 export type Services = typeof defaultServices;
 const ORDER: Stage[] = ["calm", "nudging", "invasive", "hostile", "armed", "fired", "released"];
 const SOCIAL = /drink|hang|party|friday|dinner|movie|game|free|social|plans|brunch|club/i;

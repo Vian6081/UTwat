@@ -10,6 +10,7 @@ export type RuntimeState = AppState & {
     actions: Record<string, "pending" | "complete">;
     armed?: { sessionId: string; liveViewUrl: string };
     sim?: boolean;
+    integrationMode?: "offline" | "live";
     studyPlan?: string[];
     simClock?: { startISO: string; wallISO: string; speed: number };
   };
@@ -24,6 +25,8 @@ export function defaultState(): RuntimeState {
 export function loadState(): RuntimeState {
   if (!fs.existsSync(STATE_PATH)) return defaultState();
   const state = JSON.parse(fs.readFileSync(STATE_PATH, "utf8"));
+  const mode = process.env.AMMA_OFFLINE === "true" ? "offline" : "live";
+  if (state.runtime?.integrationMode && state.runtime.integrationMode !== mode) throw new Error(`State was created in ${state.runtime.integrationMode} mode. Use a separate AMMA_STATE_PATH or the matching AMMA_OFFLINE setting.`);
   const stages: Stage[] = ["calm", "nudging", "invasive", "hostile", "armed", "fired", "released"];
   if (!Number.isFinite(Date.parse(state.deadlineISO)) || !stages.includes(state.stage) ||
       typeof state.done !== "boolean" || !Array.isArray(state.mutations) ||
@@ -31,6 +34,8 @@ export function loadState(): RuntimeState {
   return state;
 }
 export function saveState(state: AppState): void {
+  const meta = runtime(state);
+  meta.integrationMode = process.env.AMMA_OFFLINE === "true" ? "offline" : "live";
   const temp = `${STATE_PATH}.${process.pid}.tmp`;
   const fd = fs.openSync(temp, "w", 0o600);
   try { fs.writeFileSync(fd, JSON.stringify(state, null, 2) + "\n"); fs.fsyncSync(fd); }
