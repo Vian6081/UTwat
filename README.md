@@ -82,7 +82,11 @@ Verified September 12: all local suites and full offline escalation/release pass
 
 ## Hosted Instagram-style demo
 
-Private deployment: https://amma-instagram-vian.ironyman.chatgpt.site
+Public Cloudflare Pages deployment: https://amma-instagram-vian.pages.dev
+
+Cloudflare project: `amma-instagram-vian`. Deployed by direct upload of `index.html` and `photo.jpg` on the free plan. No Functions, paid plan, custom domain or billing setup. This public static demo keeps simulated posts in each visitor’s browser. Deployment success, the live page, and the loaded photo were verified in Chrome on September 12, 2026. Re-upload the standalone assets to this existing project for updates.
+
+Alternative private deployment: https://amma-instagram-vian.ironyman.chatgpt.site
 
 The hosted mock follows the supplied dark Instagram desktop reference and supports a compose dialog, editable demo caption, local simulated sharing, likes, comments, saves and follow toggles. It has no real Instagram connection. The hosted draft is stored in that browser only; it is separate from the local AMMA loop. Sites usage is included within existing plan-specific public-beta limits; no paid APIs, domain, database or billing purchase was added.
 
