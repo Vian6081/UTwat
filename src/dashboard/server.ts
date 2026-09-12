@@ -12,11 +12,12 @@ export function createDashboard() {
   app.use((_req,res,next)=>{
     res.setHeader("Cache-Control","no-store"); res.setHeader("X-Content-Type-Options","nosniff");
     res.setHeader("Referrer-Policy","no-referrer");
-    res.setHeader("Content-Security-Policy","default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'");
+    res.setHeader("Content-Security-Policy","default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'");
     next();
   });
   app.use("/instagram",mockRouter());
   app.use("/mock-instagram",mockRouter());
+  for(const file of ["app.js","replay-data.js","fonts.css"])app.get(`/dashboard/${file}`,(_req,res)=>res.sendFile(path.resolve(__dirname,file)));
   app.get("/",(_req,res)=>res.sendFile(path.resolve(__dirname,"index.html")));
   app.get("/api/state",(_req,res)=>{
     try {
@@ -41,6 +42,9 @@ export function createDashboard() {
         pendingCount:pending.length,recentActivity,
       });
     } catch {res.status(503).json({error:"State unavailable. Check the loop terminal and use matching state/mode settings."});}
+  });
+  app.get("/api/photo",(_req,res)=>{
+    try{const photo=loadState().hostagePhoto;if(!photo||!/\.(jpe?g|png)$/i.test(photo)||!fs.existsSync(photo)){res.sendStatus(404);return;}res.sendFile(path.resolve(photo));}catch{res.sendStatus(503);}
   });
   app.get("/health",(_req,res)=>res.json({ok:true}));
   return app;

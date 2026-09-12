@@ -3,7 +3,7 @@ const http = require('node:http');
 const readline = require('node:readline');
 readline.createInterface({input:process.stdin}).on('line',line=>{
  let m; try{m=JSON.parse(line);}catch{return;}
- const allowed=m.method==='GET' && ['/', '/health','/api/state','/api/runtime','/instagram','/instagram/','/instagram/state','/instagram/photo','/mock-instagram','/mock-instagram/','/mock-instagram/state','/mock-instagram/photo'].includes(m.path) || m.method==='POST' && ['/api/done','/instagram/share','/mock-instagram/share'].includes(m.path);
+ const allowed=m.method==='GET' && ['/api/photo','/dashboard/app.js','/dashboard/replay-data.js','/dashboard/fonts.css','/', '/health','/api/state','/api/runtime','/instagram','/instagram/','/instagram/state','/instagram/photo','/mock-instagram','/mock-instagram/','/mock-instagram/state','/mock-instagram/photo'].includes(m.path) || m.method==='POST' && ['/api/done','/instagram/share','/mock-instagram/share'].includes(m.path);
  if(!allowed){process.stdout.write(JSON.stringify({id:m.id,status:403,body:''})+'\n');return;}
  const request=http.request({host:'127.0.0.1',port:3003,path:m.path,method:m.method,headers:m.headers,timeout:120000},response=>{
   const chunks=[];let bytes=0;
