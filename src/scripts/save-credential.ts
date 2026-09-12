@@ -5,7 +5,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { spawnSync } from "node:child_process";
 const name=process.argv[2];
-if (!["OPENROUTER_API_KEY","GOOGLE_CLIENT_ID","GOOGLE_CLIENT_SECRET"].includes(name)) throw new Error("Specify OPENROUTER_API_KEY, GOOGLE_CLIENT_ID, or GOOGLE_CLIENT_SECRET");
+if (!["OPENROUTER_API_KEY","GOOGLE_CLIENT_ID","GOOGLE_CLIENT_SECRET","STEEL_API_KEY"].includes(name)) throw new Error("Specify OPENROUTER_API_KEY, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, or STEEL_API_KEY");
 const route=`/${randomBytes(24).toString("hex")}`;
 let origin="";
 const server=createServer(async (req,res)=>{

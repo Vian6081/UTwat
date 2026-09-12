@@ -4,10 +4,10 @@
 
 These amendments supersede conflicting statements in the original brief below.
 
-- Vian chose to use their own Instagram account instead of creating a burner (instruction in this task). Authentication is still pending a Steel API key. The application loop never calls `fireNow`, regardless of configuration.
+- Vian chose to use their own Instagram account instead of creating a burner (instruction in this task). Steel API access is configured; live Instagram profile verification is in progress. The application loop never calls `fireNow`, regardless of configuration.
 - Photo source: `~/Downloads/Aurafarmer.HEIC`. A JPEG copy is prepared at `photos/aurafarmer.jpg`, excluded from Git. The original is untouched.
 - Shared `src/types.ts` and `src/config.ts` are unchanged. Optional loop recovery metadata lives under `runtime` in state.json, declared in Vian's state.ts. Existing dashboard and module signatures remain compatible.
-- Team name selected for registration: **Sharma Ji Ka Bot**. Form registration is pending its URL and the remaining team details.
+- Team name selected for registration: **Sharma Ji Ka Bot**. Vian confirmed admission. Teammates: Asad Ullah Qureshi and Aditya Vignesh Kumar. Devpost work is deferred by Vian. The attendee team form is https://forms.gle/8jDCNgBJJcedAVai6.
 - The public Steel Browser SDK supports persistent profiles. Steel Computer is a separate preview; its installer, quota, capture API, and live-browser checkpoint behavior still need confirmation from the booth. An external Steel Browser session is not proven to be included in a Steel Computer checkpoint. Do not promise an armed restore until it has been demonstrated twice.
 
 UTWAT_Master_doc
@@ -596,3 +596,17 @@ AMMA_OFFLINE=true AMMA_STATE_PATH=/tmp/amma-ee-rehearsal-new.json npm run dash
 Open http://127.0.0.1:3000. To record another rehearsal, `npx tsx src/scripts/record-demo.ts` creates isolated state under ignored photos/ and replaces the local rehearsal video. Playwright Chromium, or installed macOS Chrome, and Playwright FFmpeg are required. The recorder does not use the user's signed-in browser profile.
 
 Still required for the live demo: Steel API key and profile verification; Google OAuth credential creation approval, user consent and live smoke test; Steel Computer preview access, overnight run and two checkpoint restores; team registration/submission access and a second physical laptop. No purchases, billing setup, messages to teammates or Instagram posts were made. The slides and rehearsal can be copied to the second laptop when it is available.
+
+
+## Live account setup — September 12, 2026, 16:40 Toronto
+
+Vian authorized completing the remaining setup without spending money, then separately approved Google's final Calendar-events/Gmail-send access grant and Steel API-key creation/free-credit use. Devpost work is explicitly deferred.
+
+- Existing AMMA Local Desktop OAuth client downloaded and stored privately. Both scopes granted and refresh token saved in `.env`. No Gmail read scope requested.
+- Real Google smoke check passed with `AMMA_OFFLINE` disabled, state `/tmp/amma-google-live-check-20260912.json`: 1 email record, integrationMode live, 0 unrestored mutations. The temporary event was created, renamed, restored and deleted. No pre-existing calendar events were modified.
+- Steel account/workspace `AMMA — Sharma Ji Ka Bot` created under the chosen Google account. API key generated and stored privately. Wallet displayed $30 included credits, $0 purchased credits, no payment methods and no purchases. No billing/top-up configured.
+- A real Steel Browser session launched and loaded Instagram's login screen. User sign-in and release/reopen profile verification are in progress. No Instagram post submitted.
+- Official public Steel docs and the event resource page provide Browser APIs, but no usable Computer beta installer or checkpoint access. A workshop/mentor access link is needed before deployment or whole-computer restore claims.
+- Event submission page found: https://battle-of-the-schools.devpost.com/. Team registration: https://forms.gle/8jDCNgBJJcedAVai6. Vian is admitted; teammates are Asad Ullah Qureshi and Aditya Vignesh Kumar. No form or Devpost submission made.
+
+`README.md` now documents an explicitly offline default rehearsal, live setup, recovery and verified limitations. Google credential files remain local/ignored; the downloaded JSON has owner-only permissions.

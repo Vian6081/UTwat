@@ -1,1 +1,70 @@
-AMMA is an autonomous motivational management agent that takes your worst photos hostage and nags you toward a deadline like a parent with root access. It lives on Google Calendar, escalating from polite emails to renamed events to a loaded Instagram post it does not send. Run `npm i && npm run sim` to play the full 18-hour ladder in about 90 seconds.
+# AMMA
+
+A parent with root access. AMMA watches a study deadline, sends escalating email reminders, reshapes your calendar and prepares an Instagram post. **A human controls the final Share.** Marking work done restores calendar changes, clears drafts and closes the prepared browser session.
+
+Built for Battle of the Schools by Sharma Ji Ka Bot: Vian Dhanda, Asad Ullah Qureshi and Aditya Vignesh Kumar.
+
+## Run the offline demo
+
+Requires Node.js 20+ and npm. From the repository root:
+
+```sh
+npm install
+AMMA_OFFLINE=true AMMA_STATE_PATH=/tmp/amma-demo-new.json HOSTAGE_PHOTO=photos/your-photo.jpg npm run sim
+```
+
+In another terminal, use the same state path:
+
+```sh
+AMMA_OFFLINE=true AMMA_STATE_PATH=/tmp/amma-demo-new.json npm run dash
+```
+
+Open http://127.0.0.1:3000. The full 18-hour progression takes about 90 seconds. Offline mode uses simulated email/calendar data and does not open Instagram. Use a new state filename for every new simulation. The photo path is a placeholder in offline mode; live mode requires an actual JPEG/PNG.
+
+## Connect live accounts
+
+Create a private `.env` using `.env.example` as a starting point. Keep `DEMO_MODE=true` and `AUTO_SEND=false`. Configure:
+
+- `GOOGLE_EMAIL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` and `GOOGLE_CALENDAR_ID=primary`. Enable Gmail and Calendar APIs and create a Desktop OAuth client with Calendar events and Gmail send scopes. Run `npx tsx src/google/auth.ts` to authorize and save the refresh token locally.
+- `OPENROUTER_API_KEY` and `OPENROUTER_MODEL=nvidia/nemotron-3-super-120b-a12b:free`.
+- `STEEL_API_KEY`. Run `npm run insta-login`, sign in manually through the Steel viewer, and confirm the restored feed. The script saves `STEEL_PROFILE_ID` after proving persistence.
+
+Put your own photo under ignored `photos/`. Never commit `.env`, photos or runtime state. A live simulation makes real external changes and sends real emails; use offline mode for routine rehearsals.
+
+Configure a separate live state file and check readiness:
+
+```sh
+AMMA_STATE_PATH=photos/live-state.json npx tsx src/scripts/configure.ts --photo photos/your-photo.jpg --deadline 2026-09-13T10:30:00-04:00
+AMMA_STATE_PATH=photos/live-state.json npx tsx src/deploy/preflight.ts
+AMMA_STATE_PATH=photos/live-state.json npx tsx src/deploy/supervisor.ts
+```
+
+The supervisor runs the loop and dashboard on the machine where you start it. Steel Browser hosts the Instagram browser; the separate Steel Computer beta is required for the proposed whole-computer checkpoint demonstration. The public browser API alone does not prove that a loaded compose window can be checkpointed and restored.
+
+## Release and recovery
+
+Use the same `AMMA_STATE_PATH` and offline/live mode as the run:
+
+```sh
+AMMA_STATE_PATH=photos/live-state.json npm run mark-done
+AMMA_STATE_PATH=photos/live-state.json npm run undo-all
+```
+
+`mark-done` permanently releases the study watch. `undo-all` restores current calendar changes without stopping future escalation. If an external request has an uncertain result, inspect the recovery journal and reconcile that action before retrying; do not delete the state file to bypass the guard.
+
+## Verification and demo assets
+
+```sh
+npx tsc --noEmit
+npx tsx src/scripts/verify.ts
+npx tsx src/scripts/verify-cs.ts
+npx tsx src/scripts/verify-ee.ts
+```
+
+The EE test requires Playwright Chromium or installed macOS Chrome. `npx tsx src/scripts/record-demo.ts` records an isolated offline run and requires Playwright FFmpeg (`npx playwright install ffmpeg`).
+
+- [Editable slides](artifacts/AMMA.pptx) and [PDF](artifacts/AMMA.pdf)
+- [Offline rehearsal video](artifacts/AMMA_offline_rehearsal.webm)
+- [Detailed setup, recovery and current verification status](UTWAT_Master_doc.md)
+
+Verified September 12: all local suites and full offline escalation/release pass; a real Google email and temporary Calendar event create/rename/restore/delete check passed. OpenRouter generation succeeded using a free model. Steel Browser launched successfully. Instagram authentication/compose, Steel Computer deployment and checkpoint restores are still pending. Devpost work is deferred by the team.
