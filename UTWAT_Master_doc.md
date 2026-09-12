@@ -628,3 +628,7 @@ This update supersedes prior pending-access/deployment notes. Steel Computer is 
 An actual 18-hour wall-clock endurance run is active locally, with offline/mock external services, from September 12 18:36 to September 13 12:36 Toronto. Completion remains pending. Detailed receipts, resource IDs, commands, blockers and safe recovery are in `artifacts/STEEL_HANDOFF.md`.
 
 The refreshed presentation is `artifacts/The_Deadline_Hostage.pptx`, with matching PDF and new rehearsal video/screenshots. The public free mock remains https://amma-instagram-vian.pages.dev/. A portable demo bundle is prepared locally for the second laptop; a physical second-device rehearsal is not claimed. Devpost remains deferred. No purchases, messages to teammates or real Instagram posts were made.
+
+## Actual Steel live run — September 12, 18:56 Toronto
+
+Vian requested the actual deployment using mock Instagram and explicitly selected real Gmail and Calendar. A new 1 GiB Steel Computer runs `src/deploy/cloud-run.ts`, including the live loop, private dashboard and mock. First real reminder and Calendar read succeeded. OpenRouter uses the existing free model. View through http://127.0.0.1:3004 on this Mac; the agent itself runs in Steel. The dashboard offers Mark work done & restore calendar. Details and lifecycle limits are in the latest README/Steel handoff update. No money or credits were purchased.

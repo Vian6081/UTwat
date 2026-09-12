@@ -33,6 +33,7 @@ export function createDashboard() {
         nowISO:current.toISOString(),clockSpeed:state.runtime?.simClock?.speed || 1,
         mode:state.runtime?.integrationMode || (process.env.AMMA_OFFLINE==="true"?"offline":"live"),
         instagramMode:mockEnabled()?"mock":"steel",
+        deployment:process.env.AMMA_DEPLOYMENT === "steel" ? "Steel Computer" : "local",
         simulation:!!state.runtime?.sim,initialized:fs.existsSync(STATE_PATH),
         photoReady:!!state.hostagePhoto && fs.existsSync(state.hostagePhoto),
         liveViewUrl:safeLiveView(state.runtime?.armed?.liveViewUrl),

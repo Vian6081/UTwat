@@ -52,3 +52,13 @@ Editable deck: `The_Deadline_Hostage.pptx`; PDF: `The_Deadline_Hostage.pdf`; vid
 The portable demo ZIP is local at `/Users/viandhanda/The_Deadline_Hostage_demo.zip`; it contains no credentials. Copy and rehearse on the second physical laptop when available. That physical rehearsal is not yet verified. Devpost remains deferred by Vian.
 
 Sources: [Steel Computer activation](https://app.steel.dev/computer-access), [preview concepts](https://computers-preview.apidocumentation.com/docs/concepts/core-concepts), [checkpoint guide](https://computers-preview.apidocumentation.com/docs/how-to/checkpoints).
+
+## Live deployment update — September 12, 18:56 Toronto
+
+The original 2 GiB computer could not resume (HTTP 502) and another checkpoint restore hit capacity. A fresh smaller computer **`cmp_036435grwqp7td6fcv3dsz9tzwjmv`** started successfully with 1 vCPU, 1 GiB RAM and an eight-hour auto-pause window. It is **running**, not paused.
+
+Vian explicitly selected real Gmail/Calendar. The live agent now runs there with free OpenRouter wording and mock Instagram. First real reminder succeeded; a read of today's Calendar returned successfully (0 events). The private browser dashboard was verified showing the cloud deployment label, real first reminder, generated caption, countdown and release button. No real Instagram connection or cloud Chromium is needed for this mock-based deployment.
+
+Private viewer: http://127.0.0.1:3004. The Mac relays the UI over Steel SSH; agent execution and data reside in `/work/amma` on the cloud computer. Live deadline is September 13 at 12:56 Toronto. A bounded local controller resumes this same computer after automatic pauses. It needs the Mac to stay open/connected and future resumes remain subject to beta availability. Its receipt is `photos/cloud-watch-receipt.json`. This is separate from the earlier local simulated endurance run.
+
+Source scripts: `cloud-run.ts`, `stdio-http.cjs`, `cloud-view.cjs`, `cloud-watch.cjs` in `src/deploy/`. TypeScript, EE and mock tests passed. The live relay rejected cross-origin release requests and unexpected Host headers with HTTP 403. The original saved checkpoint remains unchanged and its restoration remains unverified. No new checkpoint containing live credentials or Google actions was created.

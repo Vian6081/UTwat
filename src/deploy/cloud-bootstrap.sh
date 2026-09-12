@@ -10,7 +10,9 @@ getent group systemd-journal >/dev/null || groupadd --system systemd-journal
 id systemd-network >/dev/null 2>&1 || useradd --system --user-group --shell /usr/sbin/nologin --home-dir / systemd-network
 id messagebus >/dev/null 2>&1 || useradd --system --user-group --shell /usr/sbin/nologin --home-dir /nonexistent messagebus
 apt-get update -qq
-DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends nodejs npm chromium ca-certificates
+packages='nodejs npm ca-certificates'
+if [ "${AMMA_INSTALL_BROWSER:-false}" = true ]; then packages="$packages chromium"; fi
+DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $packages
 cat /etc/ssl/certs/ca-certificates.crt /run/steel/egress-ca.crt > /tmp/amma-ca.pem
 export NODE_EXTRA_CA_CERTS=/tmp/amma-ca.pem npm_config_cafile=/tmp/amma-ca.pem NPM_CONFIG_CAFILE=/tmp/amma-ca.pem
 npm install --prefix /opt/amma-node node@22 --no-audit --no-fund

@@ -97,3 +97,21 @@ Hosted source is in `/Users/viandhanda/amma-instagram-site`; its `.openai/hostin
 Current evidence and exact recovery commands: [Steel handoff](artifacts/STEEL_HANDOFF.md). The cloud computer is paused, preserving memory and disk. Only included credits were used; no billing or credit purchase was added.
 
 The local real-clock run started September 12, 2026 at 18:36 Toronto and reaches its deadline September 13 at 12:36. Keep this Mac awake and its lid open for the test. Its progress is in ignored `photos/overnight-receipt.json`; the process logs to `photos/overnight.log`. It uses offline Calendar/email and the mock, then automatically checks release/undo. It has not finished yet. Start a fresh run with `node --import tsx src/deploy/overnight.ts`; the script refuses to overwrite existing run evidence.
+
+## Live agent running on Steel Computer
+
+On September 12 at 18:56 Toronto, the real agent started on Steel Computer `cmp_036435grwqp7td6fcv3dsz9tzwjmv` (1 vCPU, 1 GiB). The first real Gmail reminder succeeded; Calendar read succeeded; free OpenRouter wording generated. Instagram uses the server-side mock, so Chromium is not needed in the cloud. The source, Node runtime, dashboard, mock state, photo and live recovery journal all run in Steel.
+
+Open **http://127.0.0.1:3004** on this Mac. This port is a private SSH relay to the cloud dashboard, not a locally executing agent and not the public Cloudflare mock. It shows `Steel Computer · Live Google · Mock Instagram`. **Mark work done & restore calendar** performs release on the cloud agent. It never presses real Instagram Share.
+
+Deadline: **September 13, 12:56 Toronto**. Steel's documented maximum run window is eight hours. The bounded `cloud-watch.cjs` controller on this Mac checks once per minute and resumes the same paused computer; it never restores a clone or repeats Google actions. It stops issuing resumes 30 minutes after the deadline, with a maximum of four resume attempts. Automatic cloud pause remains enabled. Keep the Mac open and connected for the viewer and resume checks. The cloud agent continues independently while its current run window is active. Resume success at future windows has not yet been verified.
+
+Private local status files: `photos/cloud-live-deployment.json`, `photos/cloud-watch-receipt.json`. Cloud state/log: `/work/amma/photos/cloud-live-state.json`, `/work/amma/photos/cloud-live.log`. The local endurance test remains separate and simulated.
+
+Reconnect the private viewer using the existing local Steel credential:
+
+```sh
+node src/deploy/cloud-view.cjs cmp_036435grwqp7td6fcv3dsz9tzwjmv
+```
+
+Only one viewer can listen on port 3004. The relay rejects unexpected Host/Origin headers and carries only the dashboard/mock routes over authenticated SSH. There is no public tunnel exposing your Google activity. Google and OpenRouter credentials live in a private cloud `.env`; the Steel API key stays on the Mac. Do not clone the live run's state into another active agent. The previous offline checkpoint computer remains paused for independent restore experiments.
