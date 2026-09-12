@@ -15,6 +15,7 @@ export function createDashboard() {
     res.setHeader("Content-Security-Policy","default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'");
     next();
   });
+  app.use("/instagram",mockRouter());
   app.use("/mock-instagram",mockRouter());
   app.get("/",(_req,res)=>res.sendFile(path.resolve(__dirname,"index.html")));
   app.get("/api/state",(_req,res)=>{
@@ -45,7 +46,7 @@ export function createDashboard() {
   return app;
 }
 export function safeLiveView(value?: string): string | null {
-  if(mockEnabled() && value==="/mock-instagram")return value;
+  if(mockEnabled() && (value==="/mock-instagram" || value==="/instagram"))return "/instagram";
   if(!value)return null;
   try{const url=new URL(value);return url.protocol==="https:" && (url.hostname==="steel.dev" || url.hostname.endsWith(".steel.dev")) && !url.username && !url.password && !url.search ? url.toString():null;}
   catch{return null;}

@@ -17,7 +17,7 @@ export async function armMock(photoPath:string, caption:string) {
   if(!caption.trim()||Array.from(caption).length>2200)throw new Error('Invalid mock caption');
   let post=read();
   if(!post || post.status==='cancelled') { post={id:`mock-${randomUUID()}`,caption,photoPath:path.resolve(photoPath),status:'draft',createdAt:new Date().toISOString()}; write(post); }
-  return {sessionId:post.id,liveViewUrl:'/mock-instagram'};
+  return {sessionId:post.id,liveViewUrl:'/instagram'};
 }
 export async function cancelMock(id:string) { const post=read(); if(post && post.id===id && post.status==='draft'){post.status='cancelled';post.caption='';write(post);} }
 export function mockRouter() {

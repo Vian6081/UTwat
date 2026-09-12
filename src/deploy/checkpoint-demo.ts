@@ -20,10 +20,10 @@ async function main(){
  console.log('Node-only checkpoint evidence ready');return;
  }
  const browser=await chromium.launch({headless:true,executablePath:process.env.AMMA_CHROMIUM_EXECUTABLE,args:['--no-sandbox','--disable-dev-shm-usage']});const page=await browser.newPage({viewport:{width:1440,height:1000}});
- await page.goto('http://127.0.0.1:3000/mock-instagram');await page.getByRole('button',{name:'Review draft'}).click();
+ await page.goto('http://127.0.0.1:3000/instagram');await page.getByRole('button',{name:'Create',exact:true}).click();
  const browserNonce=randomUUID();
  await page.evaluate(n=>{document.body.dataset.checkpointNonce=n;},browserNonce);
  await page.screenshot({path:'photos/checkpoint-compose.png'});
- createServer(async(req,res)=>{if(req.url!=='/evidence'){res.writeHead(404);res.end();return;}try{res.setHeader('Content-Type','application/json');res.end(JSON.stringify({nodeNonce,browserNonce:await page.evaluate(()=>document.body.dataset.checkpointNonce),pid:process.pid,ticks,title:await page.title(),composeVisible:await page.locator('#modal').isVisible(),caption:await page.locator('#composeCaption').inputValue(),photoLoaded:await page.locator('#composePhoto').evaluate((el:HTMLImageElement)=>el.complete&&el.naturalWidth>0),shareEnabled:await page.getByRole('button',{name:'Share in mock only'}).isEnabled(),stage:loadState().stage,at:new Date().toISOString()}));}catch{res.writeHead(503);res.end('Browser evidence unavailable');}}).listen(3002,'127.0.0.1',()=>console.log('Checkpoint demo ready: http://127.0.0.1:3002/evidence'));
+ createServer(async(req,res)=>{if(req.url!=='/evidence'){res.writeHead(404);res.end();return;}try{res.setHeader('Content-Type','application/json');res.end(JSON.stringify({nodeNonce,browserNonce:await page.evaluate(()=>document.body.dataset.checkpointNonce),pid:process.pid,ticks,title:await page.title(),composeVisible:await page.locator('#modal').isVisible(),caption:await page.locator('#composeCaption').inputValue(),photoLoaded:await page.locator('#composePhoto').evaluate((el:HTMLImageElement)=>el.complete&&el.naturalWidth>0),shareEnabled:await page.getByRole('button',{name:'Share',exact:true}).isEnabled(),stage:loadState().stage,at:new Date().toISOString()}));}catch{res.writeHead(503);res.end('Browser evidence unavailable');}}).listen(3002,'127.0.0.1',()=>console.log('Checkpoint demo ready: http://127.0.0.1:3002/evidence'));
 }
 main().catch(e=>{console.error(e);process.exit(1);});

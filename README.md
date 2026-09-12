@@ -115,3 +115,7 @@ node src/deploy/cloud-view.cjs cmp_036435grwqp7td6fcv3dsz9tzwjmv
 ```
 
 Only one viewer can listen on port 3004. The relay rejects unexpected Host/Origin headers and carries only the dashboard/mock routes over authenticated SSH. There is no public tunnel exposing your Google activity. Google and OpenRouter credentials live in a private cloud `.env`; the Steel API key stays on the Mac. Do not clone the live run's state into another active agent. The previous offline checkpoint computer remains paused for independent restore experiments.
+
+## Instagram interface update
+
+The feed and composer now follow the supplied Instagram desktop reference: narrow icon rail, 4:5 post, wider suggestion gutter, account row and a header-level Share action. Visible mock/demo labels were removed at Vian's request. Open **Create (+)** to review the prepared caption and photo. The visible route is `/instagram`; the old route remains a compatibility alias. Public Cloudflare and the private Steel dashboard both use this interface. The underlying Instagram behavior remains a replica with locally stored posts; it does not connect to Instagram.
