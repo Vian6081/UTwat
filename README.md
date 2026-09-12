@@ -16,7 +16,7 @@ The mock is a replacement demo integration, not proof of real Instagram automati
 
 ## Run the offline demo
 
-Requires Node.js 20+ and npm. From the repository root:
+Requires Node.js 22+ and npm. From the repository root:
 
 ```sh
 npm install
@@ -74,11 +74,11 @@ npx tsx src/scripts/verify-mock.ts
 
 The EE test requires Playwright Chromium or installed macOS Chrome. `npx tsx src/scripts/record-demo.ts` records an isolated offline run including the mock compose preview and requires Playwright FFmpeg (`npx playwright install ffmpeg`).
 
-- [Editable slides with current demo notes](artifacts/AMMA_mock.pptx) and [PDF](artifacts/AMMA.pdf)
+- [Editable slides with current demo notes](artifacts/The_Deadline_Hostage.pptx) and [PDF](artifacts/The_Deadline_Hostage.pdf)
 - [Mock rehearsal video](artifacts/AMMA_mock_rehearsal.webm)
 - [Detailed setup, recovery and current verification status](UTWAT_Master_doc.md)
 
-Verified September 12: all local suites and full offline escalation/release pass; a real Google email and temporary Calendar event create/rename/restore/delete check passed. OpenRouter generation succeeded using a free model. Steel Browser launched successfully. Local mock composition, simulated sharing and cancellation are implemented and tested. Real Instagram authentication/compose, Steel Computer deployment and checkpoint restores are still pending. Devpost work is deferred by the team.
+Verified September 12: all local suites and full offline escalation/release pass; a real Google email and temporary Calendar event create/rename/restore/delete check passed. OpenRouter generation succeeded using a free model. Steel Browser launched successfully. Local mock composition, simulated sharing and cancellation are implemented and tested. Steel Computer beta is activated; the cloud Node simulation passed and a checkpoint reached ready. Two restore attempts failed with a beta capacity error. Both Chromium builds crash with SIGTRAP, so browser restoration remains unverified. The local 18-hour endurance test is running with offline/mock services. Real Instagram authentication/compose remains unverified. Devpost work is deferred by the team.
 
 ## Hosted Instagram-style demo
 
@@ -90,4 +90,10 @@ Alternative private deployment: https://amma-instagram-vian.ironyman.chatgpt.sit
 
 The hosted mock follows the supplied dark Instagram desktop reference and supports a compose dialog, editable demo caption, local simulated sharing, likes, comments, saves and follow toggles. It has no real Instagram connection. The hosted draft is stored in that browser only; it is separate from the local AMMA loop. Sites usage is included within existing plan-specific public-beta limits; no paid APIs, domain, database or billing purchase was added.
 
-Hosted source is in `/Users/viandhanda/amma-instagram-site`; its `.openai/hosting.json` owns the existing Site registration. Reuse that registration for updates. The local loop uses `src/insta/mock.html` with its existing mock API. For the standalone deployment, that same HTML has `window.AMMA_STANDALONE=true` inserted before the application script and uses the selected photo as `dist/photo.jpg`. Credentials and AMMA runtime state are excluded. The earlier rehearsal video predates this visual redesign.
+Hosted source is in `/Users/viandhanda/amma-instagram-site`; its `.openai/hosting.json` owns the existing Site registration. Reuse that registration for updates. The local loop uses `src/insta/mock.html` with its existing mock API. For the standalone deployment, that same HTML has `window.AMMA_STANDALONE=true` inserted before the application script and uses the selected photo as `dist/photo.jpg`. Credentials and AMMA runtime state are excluded. The rehearsal video was regenerated after this visual redesign and project rename.
+
+## Steel Computer beta and endurance run
+
+Current evidence and exact recovery commands: [Steel handoff](artifacts/STEEL_HANDOFF.md). The cloud computer is paused, preserving memory and disk. Only included credits were used; no billing or credit purchase was added.
+
+The local real-clock run started September 12, 2026 at 18:36 Toronto and reaches its deadline September 13 at 12:36. Keep this Mac awake and its lid open for the test. Its progress is in ignored `photos/overnight-receipt.json`; the process logs to `photos/overnight.log`. It uses offline Calendar/email and the mock, then automatically checks release/undo. It has not finished yet. Start a fresh run with `node --import tsx src/deploy/overnight.ts`; the script refuses to overwrite existing run evidence.

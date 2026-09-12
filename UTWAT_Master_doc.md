@@ -620,3 +620,11 @@ Run `npm run mock`. The launcher creates a fresh private state directory, starts
 `src/scripts/verify-mock.ts` tests local composition, literal caption rendering, simulated sharing, cross-origin write rejection, cancellation, released-state protection and mobile layout. The runtime, CS and EE suites also pass. `artifacts/AMMA_mock_rehearsal.webm` records full escalation, the mock photo/caption preview, and release. `artifacts/mock-instagram.png` captures the prepared mock. `artifacts/AMMA_mock.pptx` updates presentation notes for this demo; the earlier PDF has the same visible slides, with older presenter notes in the original PPTX.
 
 Remaining real-world work: Steel Computer beta access, an actual overnight run and two whole-computer checkpoint restores, second-laptop rehearsal/copy, and deferred Devpost/team registration. A local JSON draft surviving a restart is not proof of a whole-computer checkpoint. No billing purchases or real Instagram posts were made. No credentials are included in demo artifacts.
+
+## Steel Computer beta update — September 12, 2026, 18:39 Toronto
+
+This update supersedes prior pending-access/deployment notes. Steel Computer is activated and the preview CLI is installed. The Node simulation ran successfully in cloud Debian; a real checkpoint reached ready. Both Chromium builds crash with SIGTRAP. Two checkpoint restores failed with Steel capacity HTTP 503, including after source pause. The source is paused and preserved. Browser/process restoration is not yet verified.
+
+An actual 18-hour wall-clock endurance run is active locally, with offline/mock external services, from September 12 18:36 to September 13 12:36 Toronto. Completion remains pending. Detailed receipts, resource IDs, commands, blockers and safe recovery are in `artifacts/STEEL_HANDOFF.md`.
+
+The refreshed presentation is `artifacts/The_Deadline_Hostage.pptx`, with matching PDF and new rehearsal video/screenshots. The public free mock remains https://amma-instagram-vian.pages.dev/. A portable demo bundle is prepared locally for the second laptop; a physical second-device rehearsal is not claimed. Devpost remains deferred. No purchases, messages to teammates or real Instagram posts were made.
