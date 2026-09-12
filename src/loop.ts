@@ -1,48 +1,18 @@
-import {
-  config,
-  DEFAULT_DEADLINE_HOURS,
-  EMAIL_INTERVAL_MS,
-  STAGE_THRESHOLDS,
-} from "./config";
-import { now } from "./clock";
-import {
-  deleteEvent,
-  insertStudyBlock,
-  listEventsToday,
-  renameEvent,
-} from "./google/calendar";
+import * as fs from "fs";
+import { EMAIL_INTERVAL_MS, STAGE_THRESHOLDS } from "./config";
+import { now, startSimulation } from "./clock";
+import * as calendar from "./google/calendar";
 import { sendNag } from "./google/gmail";
-import { armCompose, fireNow } from "./insta/post";
-import {
-  generateCaption,
-  generateEmail,
-  generateEventTitle,
-} from "./roast/generate";
-import { defaultState, loadState, saveState } from "./state";
-import { AppState, CalendarEvent, Stage } from "./types";
+import { armCompose } from "./insta/post";
+import * as roast from "./roast/generate";
+import { defaultState, loadState, runtime, RuntimeState, saveState, STATE_PATH, withStateLock } from "./state";
+import { CalendarEvent, Stage } from "./types";
 
-const SIM = process.env.SIM === "1" || process.argv.includes("--sim");
-const STAGE_ORDER: Stage[] = [
-  "calm",
-  "nudging",
-  "invasive",
-  "hostile",
-  "armed",
-  "fired",
-  "released",
-];
-const SOCIAL_RE =
-  /drink|hang|party|friday|dinner|movie|game|free|social|plans|brunch|club/i;
-
-function rank(stage: Stage): number {
-  return STAGE_ORDER.indexOf(stage);
-}
-
-function hoursLeft(deadlineISO: string): number {
-  return (new Date(deadlineISO).getTime() - now().getTime()) / 3_600_000;
-}
-
-function stageFor(h: number, done: boolean): Stage {
+export const defaultServices = { ...calendar, ...roast, sendNag, armCompose };
+export type Services = typeof defaultServices;
+const ORDER: Stage[] = ["calm", "nudging", "invasive", "hostile", "armed", "fired", "released"];
+const SOCIAL = /drink|hang|party|friday|dinner|movie|game|free|social|plans|brunch|club/i;
+export function stageFor(h: number, done = false): Stage {
   if (done) return "released";
   if (h <= 0) return "fired";
   if (h < STAGE_THRESHOLDS.armed) return "armed";
@@ -51,231 +21,161 @@ function stageFor(h: number, done: boolean): Stage {
   if (h <= STAGE_THRESHOLDS.nudging) return "nudging";
   return "calm";
 }
-
-function contextOf(state: AppState): string {
-  const titles = state.mutations.map((m) => m.newTitle).join(", ");
-  return `emails ignored: ${state.emailsSent.length}; hijacked events: ${state.mutations.filter((m) => !m.undone).length}; titles: ${titles || "(none)"}; study minutes: ${state.studyMinutesLogged}`;
+function context(state: RuntimeState) {
+  return `emails ignored: ${state.emailsSent.length}; study minutes: ${state.studyMinutesLogged}; events: ${state.mutations.map(m => m.originalTitle || m.newTitle).join(", ")}`;
 }
-
-function msSinceLastEmail(state: AppState): number {
-  const last = state.emailsSent[state.emailsSent.length - 1];
-  if (!last) return Infinity;
-  return now().getTime() - new Date(last.at).getTime();
+// A pending action may have succeeded remotely. Never blindly repeat an uncertain side effect.
+async function once(state: RuntimeState, key: string, work: () => Promise<void>) {
+  const actions = runtime(state).actions;
+  if (actions[key] === "complete") return;
+  if (actions[key] === "pending") throw new Error(`Uncertain external action: ${key}. Reconcile with the service before retrying; recovery data is in state.json.`);
+  actions[key] = "pending"; saveState(state);
+  await work();
+  actions[key] = "complete"; saveState(state);
 }
-
-async function sendAndLog(
-  state: AppState,
-  stage: Stage,
-  h: number,
-  extra = ""
-): Promise<void> {
-  const email = await generateEmail(stage, h, `${contextOf(state)} ${extra}`.trim());
-  await sendNag(email.subject, email.body);
-  state.emailsSent.push({
-    at: now().toISOString(),
-    subject: email.subject,
-    body: email.body,
+async function email(state: RuntimeState, key: string, stage: Stage, h: number, services: Services, extra = "") {
+  await once(state, key, async () => {
+    const message = await services.generateEmail(stage, h, `${context(state)} ${extra}`);
+    await services.sendNag(message.subject, message.body);
+    state.emailsSent.push({ at: now().toISOString(), ...message });
   });
 }
-
-async function appendDraft(state: AppState, stage: Stage): Promise<string> {
-  const caption = await generateCaption(stage, contextOf(state));
-  state.drafts.push({ at: now().toISOString(), stage, caption });
+async function draft(state: RuntimeState, stage: Stage, services: Services) {
+  const existing = state.drafts.find(d => d.stage === stage);
+  if (existing) return existing.caption;
+  const caption = await services.generateCaption(stage, context(state));
+  state.drafts.push({ at: now().toISOString(), stage, caption }); saveState(state);
   return caption;
 }
-
-function claimedIds(state: AppState): Set<string> {
-  return new Set(
-    state.mutations.filter((m) => !m.undone).map((m) => m.eventId)
-  );
+export function freeStudySlots(events: CalendarEvent[], start: number, deadline: number, count = 2): string[] {
+  const busy = events.map(e => [Date.parse(e.start), Date.parse(e.end)])
+    .filter(([a,b]) => Number.isFinite(a) && Number.isFinite(b) && b > start && a < deadline)
+    .sort((a,b) => a[0]-b[0]);
+  const slots: string[] = [];
+  let cursor = start;
+  for (const [a,b] of [...busy, [deadline, deadline]]) {
+    while (slots.length < count && cursor + 3_600_000 <= Math.min(a, deadline)) {
+      slots.push(new Date(cursor).toISOString()); cursor += 3_600_000;
+    }
+    cursor = Math.max(cursor, b);
+  }
+  return slots;
 }
-
-async function renameTargets(
-  state: AppState,
-  events: CalendarEvent[],
-  h: number
-): Promise<void> {
-  const claimed = claimedIds(state);
-  for (const ev of events) {
-    if (claimed.has(ev.id)) continue;
-    const newTitle = await generateEventTitle(ev.title, h);
-    await renameEvent(ev.id, newTitle);
-    state.mutations.push({
-      eventId: ev.id,
-      originalTitle: ev.title,
-      newTitle,
-      at: now().toISOString(),
-      undone: false,
+async function studyBlocks(state: RuntimeState, services: Services) {
+  if (runtime(state).actions["nudging:blocks"] === "complete") return;
+  // Persist the plan before creating anything so restart uses identical action keys.
+  const actions = runtime(state).actions;
+  const planned = runtime(state).studyPlan ||= freeStudySlots(
+    await services.listEventsToday(), now().getTime() + 30 * 60_000,
+    // listEventsToday cannot guarantee tomorrow's availability.
+    Math.min(Date.parse(state.deadlineISO), new Date(now().getFullYear(), now().getMonth(), now().getDate() + 1).getTime()));
+  saveState(state);
+  if (planned.length < 2) console.log(`[amma] Only ${planned.length} free study slot(s) before today ends; no overlaps created.`);
+  for (const start of planned) {
+    await once(state, `insert:${start}`, async () => {
+      const id = await services.insertStudyBlock(start, 60);
+      state.mutations.push({ eventId: id, originalTitle: "", newTitle: "STUDY BLOCK", at: now().toISOString(), undone: false });
     });
   }
+  actions["nudging:blocks"] = "complete"; saveState(state);
 }
-
-async function undoMutations(state: AppState): Promise<void> {
-  for (const m of state.mutations) {
-    if (m.undone) continue;
-    if (!m.originalTitle) {
-      await deleteEvent(m.eventId);
-    } else {
-      await renameEvent(m.eventId, m.originalTitle);
-    }
-    m.undone = true;
+async function renameTargets(state: RuntimeState, services: Services, stage: Stage, h: number) {
+  const events = await services.listEventsToday();
+  for (const event of events) {
+    if (stage === "invasive" && !SOCIAL.test(event.title)) continue;
+    const prior = state.mutations.find(m => m.eventId === event.id && !m.undone);
+    if (prior) continue;
+    const title = await services.generateEventTitle(event.title, h);
+    state.mutations.push({ eventId: event.id, originalTitle: event.title, newTitle: title, at: now().toISOString(), undone: false });
+    saveState(state); // Write-ahead undo record, even if rename throws after reaching Google.
+    await once(state, `rename:${event.id}`, () => services.renameEvent(event.id, title));
   }
 }
-
-async function enterStage(state: AppState, next: Stage): Promise<void> {
-  const prev = state.stage;
-  const h = hoursLeft(state.deadlineISO);
-  if (prev === next) {
-    console.log(`==> ${next}  (${h.toFixed(2)}h left)`);
-  } else {
-    console.log(`==> ${prev} → ${next}  (${h.toFixed(2)}h left)`);
+export async function undoMutations(state: RuntimeState, services: Services = defaultServices) {
+  const failures: string[] = [];
+  for (const mutation of [...state.mutations].reverse()) {
+    if (mutation.undone) continue;
+    try {
+      if (mutation.originalTitle === "" && mutation.newTitle === "STUDY BLOCK") {
+        try { await services.deleteEvent(mutation.eventId); }
+        catch (error: any) { if (![404, 410].includes(Number(error.code || error.response?.status))) throw error; }
+      } else await services.renameEvent(mutation.eventId, mutation.originalTitle);
+      mutation.undone = true; saveState(state);
+    } catch { failures.push(mutation.eventId); }
   }
-  state.stage = next;
-
-  if (next === "calm") {
-    await sendAndLog(state, "calm", h, "first polite ping");
-  } else if (next === "nudging") {
-    await sendAndLog(state, "nudging", h);
-    const t1 = new Date(now().getTime() + 30 * 60 * 1000).toISOString();
-    const t2 = new Date(now().getTime() + 3 * 60 * 60 * 1000).toISOString();
-    const id1 = await insertStudyBlock(t1, 60);
-    const id2 = await insertStudyBlock(t2, 60);
-    for (const id of [id1, id2]) {
-      state.mutations.push({
-        eventId: id,
-        originalTitle: "",
-        newTitle: "STUDY BLOCK",
-        at: now().toISOString(),
-        undone: false,
-      });
-    }
-    await appendDraft(state, "nudging");
-  } else if (next === "invasive") {
-    const events = await listEventsToday();
-    const social = events.filter((e) => SOCIAL_RE.test(e.title));
-    await renameTargets(state, social, h);
-    const caption = await appendDraft(state, "invasive");
-    await sendAndLog(state, "invasive", h, `caption preview: ${caption}`);
-  } else if (next === "hostile") {
-    const events = await listEventsToday();
-    const unclaimed = events.filter((e) => !claimedIds(state).has(e.id));
-    await renameTargets(state, unclaimed, h);
-    const prevCaption = state.drafts[state.drafts.length - 1]?.caption ?? "";
-    const caption = await appendDraft(state, "hostile");
-    await sendAndLog(
-      state,
-      "hostile",
-      h,
-      `caption diff: "${prevCaption}" → "${caption}"`
-    );
-  } else if (next === "armed") {
-    const caption =
-      state.drafts[state.drafts.length - 1]?.caption ??
-      (await appendDraft(state, "armed"));
-    const photo = state.hostagePhoto ?? "photos/hostage.jpg";
-    const armed = await armCompose(photo, caption);
-    await sendAndLog(
-      state,
-      "armed",
-      h,
-      `It's loaded. liveView=${armed.liveViewUrl}`
-    );
-  } else if (next === "fired") {
-    if (config.autoSend && !config.demoMode) {
-      await fireNow();
-    } else {
-      console.log("[amma] deadline passed — waiting. AUTO_SEND is off.");
-    }
-  } else if (next === "released") {
-    await undoMutations(state);
-    state.drafts = [];
-    await sendAndLog(state, "released", Math.max(h, 0), "they did the work");
-  }
-
-  state.lastCheckISO = now().toISOString();
-  saveState(state);
+  const uncertainInserts = Object.entries(runtime(state).actions).filter(([k,v]) => k.startsWith("insert:") && v === "pending");
+  if (failures.length || uncertainInserts.length) throw new Error(`Undo incomplete: ${failures.join(", ")}; uncertain study insertions: ${uncertainInserts.map(([k]) => k).join(", ")}`);
 }
-
-async function periodic(state: AppState): Promise<void> {
-  const h = hoursLeft(state.deadlineISO);
-  const elapsed = msSinceLastEmail(state);
-
-  if (state.stage === "nudging" && elapsed >= EMAIL_INTERVAL_MS.nudging) {
-    await sendAndLog(state, "nudging", h, "periodic");
-    saveState(state);
-  } else if (
-    state.stage === "invasive" &&
-    elapsed >= EMAIL_INTERVAL_MS.invasive
-  ) {
-    await sendAndLog(state, "invasive", h, "periodic");
-    saveState(state);
-  } else if (
-    state.stage === "hostile" &&
-    elapsed >= EMAIL_INTERVAL_MS.hostile
-  ) {
-    await sendAndLog(state, "hostile", h, "periodic");
-    saveState(state);
-  }
+export async function armState(state: RuntimeState, services: Services = defaultServices) {
+  if (state.done || state.stage === "released") throw new Error("Work is done; refusing to arm");
+  if (!runtime(state).armed && !state.hostagePhoto) throw new Error("Set HOSTAGE_PHOTO to a copy of your solo photo before arming");
+  await once(state, "arm:compose", async () => {
+    const caption = state.drafts.at(-1)?.caption || await draft(state, "armed", services);
+    if (!state.hostagePhoto) throw new Error("Set HOSTAGE_PHOTO to a copy of your solo photo before arming");
+    runtime(state).armed = await services.armCompose(state.hostagePhoto, caption);
+  });
+  return runtime(state).armed;
 }
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function main(): Promise<void> {
-  if (SIM) {
-    process.env.SIM = "1";
-    const fresh = defaultState();
-    fresh.deadlineISO = new Date(
-      now().getTime() + DEFAULT_DEADLINE_HOURS * 60 * 60 * 1000
-    ).toISOString();
-    saveState(fresh);
-    console.log(
-      `[amma] SIM on — ${DEFAULT_DEADLINE_HOURS}h ladder, deadline ${fresh.deadlineISO}`
-    );
-  }
-
-  let enteredCurrent = false;
-
-  while (true) {
+export async function tick(services: Services = defaultServices): Promise<RuntimeState> {
+  return withStateLock(async () => {
     const state = loadState();
-    const h = hoursLeft(state.deadlineISO);
+    const h = (Date.parse(state.deadlineISO) - now().getTime()) / 3_600_000;
     const computed = stageFor(h, state.done);
-
-    const shouldRelease =
-      state.done && state.stage !== "released";
-    const shouldEscalate =
-      !shouldRelease && rank(computed) > rank(state.stage);
-
-    if (shouldRelease) {
-      await enterStage(state, "released");
-    } else if (shouldEscalate) {
-      await enterStage(state, computed);
-      enteredCurrent = true;
-    } else if (!enteredCurrent && state.lastCheckISO === null) {
-      await enterStage(state, state.stage);
-      enteredCurrent = true;
-    } else {
-      await periodic(state);
-      state.lastCheckISO = now().toISOString();
+    const next = computed === "released" || ORDER.indexOf(computed) > ORDER.indexOf(state.stage) ? computed : state.stage;
+    const actions = runtime(state).actions;
+    if (next !== "released") {
+      const pending = Object.keys(actions).filter(key => actions[key] === "pending");
+      if (pending.length) throw new Error(`Uncertain external actions require reconciliation: ${pending.join(", ")}`);
+    }
+    const entering = actions[`stage:${next}`] !== "complete";
+    if (entering) {
+      state.stage = next; saveState(state);
+      console.log(`[amma] ${next} (${h.toFixed(2)}h left)`);
+      if (next === "released") {
+        state.drafts = []; saveState(state);
+        await undoMutations(state, services);
+        // EE owns closing an already armed browser; shared interface has no cancelCompose.
+        await email(state, "email:released", next, h, services, "Work complete. Calendar restored. Do not publish any armed draft.");
+      } else {
+        if (next === "nudging") await studyBlocks(state, services);
+        if (next === "invasive" || next === "hostile") await renameTargets(state, services, next, h);
+        const caption = await draft(state, next, services);
+        if (next === "armed" || next === "fired") await armState(state, services);
+        const previous = state.drafts.at(-2)?.caption || "(none)";
+        await email(state, `email:${next}`, next, h, services,
+          next === "hostile" ? `Caption diff: ${previous} -> ${caption}` :
+          next === "armed" || next === "fired" ? `It's loaded. Waiting for a human. ${runtime(state).armed?.liveViewUrl}` : `Caption preview: ${caption}`);
+      }
+      actions[`stage:${next}`] = "complete";
+    } else if (next in EMAIL_INTERVAL_MS) {
+      const interval = EMAIL_INTERVAL_MS[next as keyof typeof EMAIL_INTERVAL_MS];
+      const last = state.emailsSent.at(-1);
+      if (!last || now().getTime() - Date.parse(last.at) >= interval) {
+        await email(state, `periodic:${next}:${state.emailsSent.length}`, next, h, services);
+      }
+    }
+    state.lastCheckISO = now().toISOString(); saveState(state);
+    return state;
+  });
+}
+export async function main() {
+  const sim = process.argv.includes("--sim") || process.env.SIM === "1";
+  if (sim) {
+    await withStateLock(async () => {
+      if (fs.existsSync(STATE_PATH)) throw new Error("Simulation needs a fresh state path. Preserve the existing undo log; use AMMA_STATE_PATH=/tmp/amma-demo.json npm run sim.");
+      startSimulation();
+      const state = defaultState(); runtime(state).sim = true;
+      runtime(state).simClock = { startISO: now().toISOString(), wallISO: new Date().toISOString(), speed: 720 };
       saveState(state);
-    }
-
-    const latest = loadState();
-    if (latest.stage === "released") {
-      console.log("[amma] released. ladder complete.");
-      break;
-    }
-    if (latest.stage === "fired" && SIM) {
-      console.log("[amma] fired. sim ladder complete.");
-      break;
-    }
-
-    await sleep(SIM ? 200 : 30_000);
+    });
+  }
+  let stopping = false;
+  process.once("SIGINT", () => { stopping = true; });
+  process.once("SIGTERM", () => { stopping = true; });
+  while (!stopping) {
+    const state = await tick();
+    if (state.stage === "released" || (sim && state.stage === "fired")) break;
+    await new Promise(resolve => setTimeout(resolve, sim ? 100 : 1000));
   }
 }
-
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+if (require.main === module) main().catch(error => { console.error(error.message); process.exitCode = 1; });

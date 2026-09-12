@@ -1,24 +1,10 @@
-import { deleteEvent, renameEvent } from "../google/calendar";
-import { loadState, saveState } from "../state";
-
-async function main(): Promise<void> {
-  const state = loadState();
-  let restored = 0;
-  for (const m of state.mutations) {
-    if (m.undone) continue;
-    if (!m.originalTitle) {
-      await deleteEvent(m.eventId);
-    } else {
-      await renameEvent(m.eventId, m.originalTitle);
-    }
-    m.undone = true;
-    restored += 1;
-  }
-  saveState(state);
-  console.log(`[undo-all] restored ${restored} mutation(s)`);
+import { undoMutations } from "../loop";
+import { loadState, withStateLock } from "../state";
+async function main() {
+  await withStateLock(async () => {
+    const state = loadState();
+    await undoMutations(state);
+    console.log("[undo-all] Calendar restored; running loop can make future changes. Use mark-done to release permanently.");
+  });
 }
-
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+if (require.main === module) main().catch(e => { console.error(e.message); process.exitCode = 1; });

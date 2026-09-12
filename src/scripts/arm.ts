@@ -1,17 +1,12 @@
-import { armCompose } from "../insta/post";
-import { loadState } from "../state";
-
-async function main(): Promise<void> {
-  const state = loadState();
-  const caption =
-    state.drafts[state.drafts.length - 1]?.caption ??
-    "It's loaded. You know what you did.";
-  const photo = state.hostagePhoto ?? "photos/hostage.jpg";
-  const result = await armCompose(photo, caption);
-  console.log("[arm]", result);
+import { armState } from "../loop";
+import { loadState, saveState, withStateLock } from "../state";
+async function main() {
+  await withStateLock(async () => {
+    const state = loadState();
+    const result = await armState(state);
+    state.stage = state.stage === "fired" ? "fired" : "armed";
+    saveState(state);
+    console.log("[arm] Waiting for a human; no send action is called.", result);
+  });
 }
-
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+if (require.main === module) main().catch(e => { console.error(e.message); process.exitCode = 1; });
