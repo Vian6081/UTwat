@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import {publicPostingEnabled,publishWebsite} from "./insta/publish";
 import { EMAIL_INTERVAL_MS, STAGE_THRESHOLDS } from "./config";
 import { now, startSimulation } from "./clock";
 import * as calendar from "./google/calendar";
@@ -9,7 +10,7 @@ import * as roast from "./roast/generate";
 import { defaultState, loadState, runtime, RuntimeState, saveState, STATE_PATH, withStateLock } from "./state";
 import { CalendarEvent, Stage } from "./types";
 
-export const defaultServices = { ...calendar, ...roast, sendNag, cancelCompose,
+export const defaultServices = { publishWebsite, ...calendar, ...roast, sendNag, cancelCompose,
   armCompose: async (photo: string, caption: string) => {
     if (offline() && process.env.AMMA_INSTAGRAM_MODE!=="mock") { console.log("[offline] Compose prepared; no browser opened."); return { sessionId: "offline-session", liveViewUrl: "about:blank" }; }
     return armCompose(photo, caption);
@@ -151,10 +152,11 @@ export async function tick(services: Services = defaultServices): Promise<Runtim
         if (next === "invasive" || next === "hostile") await renameTargets(state, services, next, h);
         const caption = await draft(state, next, services);
         if (next === "armed" || next === "fired") await armState(state, services);
+        if(next === "fired" && publicPostingEnabled())await once(state,"publish:website",async()=>{runtime(state).publication=await services.publishWebsite(state);});
         const previous = state.drafts.at(-2)?.caption || "(none)";
         await email(state, `email:${next}`, next, h, services,
           next === "hostile" ? `Caption diff: ${previous} -> ${caption}` :
-          next === "armed" || next === "fired" ? `It's loaded. Waiting for a human. ${runtime(state).armed?.liveViewUrl}` : `Caption preview: ${caption}`);
+          next === "armed" || next === "fired" ? publicPostingEnabled() ? (next === "fired" ? `Published to ${runtime(state).publication?.url}` : "The photo will publish to our website when the deadline expires unless work is verified.") : `It's loaded. Waiting for a human. ${runtime(state).armed?.liveViewUrl}` : `Caption preview: ${caption}`);
       }
       actions[`stage:${next}`] = "complete";
     } else if (next in EMAIL_INTERVAL_MS) {
@@ -163,6 +165,9 @@ export async function tick(services: Services = defaultServices): Promise<Runtim
       if (!last || now().getTime() - Date.parse(last.at) >= interval) {
         await email(state, `periodic:${next}:${state.emailsSent.length}`, next, h, services);
       }
+    }
+    if(next === "fired" && publicPostingEnabled() && !state.done){
+      await once(state,"publish:website",async()=>{runtime(state).publication=await services.publishWebsite(state);});
     }
     state.lastCheckISO = now().toISOString(); saveState(state);
     return state;

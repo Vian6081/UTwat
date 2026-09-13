@@ -9,6 +9,7 @@ export type RuntimeState = AppState & {
   runtime?: {
     actions: Record<string, "pending" | "complete">;
     armed?: { sessionId: string; liveViewUrl: string };
+    publication?: {id:string;url:string;postedAt:string};
     sim?: boolean;
     integrationMode?: "offline" | "live";
     studyPlan?: string[];

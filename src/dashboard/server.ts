@@ -41,7 +41,7 @@ export function createDashboard() {
         simulation:!!state.runtime?.sim,initialized:fs.existsSync(STATE_PATH),
         photoReady:!!state.hostagePhoto && fs.existsSync(state.hostagePhoto),
         liveViewUrl:safeLiveView(state.runtime?.armed?.liveViewUrl),
-        pendingCount:pending.length,recentActivity,
+        publicPosting:process.env.AMMA_PUBLIC_POSTING === "true",publication:state.runtime?.publication || null,pendingCount:pending.length,recentActivity,
       });
     } catch {res.status(503).json({error:"State unavailable. Check the loop terminal and use matching state/mode settings."});}
   });

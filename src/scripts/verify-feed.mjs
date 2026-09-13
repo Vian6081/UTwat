@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const {default:worker}=await import('data:text/javascript;base64,'+Buffer.from(fs.readFileSync(new URL('../../deploy/public-feed/_worker.js',import.meta.url))).toString('base64'));
+const store=new Map(),env={PUBLISH_TOKEN:'test',POSTS:{get:async k=>store.has(k)?JSON.parse(store.get(k)):null,put:async(k,v)=>store.set(k,v)},ASSETS:{fetch:()=>new Response('page')}};
+const req=(body,token='test')=>new Request('https://test/feed/publish',{method:'POST',headers:{Authorization:`Bearer ${token}`},body:JSON.stringify(body)});
+const post={id:'a'.repeat(64),caption:'deadline',photo:Buffer.from([255,216,255,0]).toString('base64'),mime:'image/jpeg',createdAt:new Date().toISOString()};
+assert.equal((await worker.fetch(req(post,'wrong'),env)).status,401);
+assert.equal((await worker.fetch(req({...post,photo:'not an image'}),env)).status,400);
+assert.equal((await worker.fetch(req(post),env)).status,200);
+assert.equal((await worker.fetch(req(post),env)).status,200);assert.equal(store.size,2);
+const publicState=await (await worker.fetch(new Request('https://test/feed/state'),env)).json();assert.equal(publicState.status,'posted');assert.equal(publicState.photo,undefined);
+assert.equal((await worker.fetch(new Request('https://test/feed/photo'),env)).headers.get('Content-Type'),'image/jpeg');
+console.log('PASS: auth, image validation, idempotent post, shared public state/photo.');

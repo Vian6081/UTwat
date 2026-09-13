@@ -1,16 +1,27 @@
 # AMMA
 
-A parent with root access. AMMA watches a study deadline, sends escalating email reminders, reshapes your calendar and prepares an Instagram post. **A human controls the final Share.** Marking work done restores calendar changes, clears drafts and closes the prepared browser session.
+AMMA watches a study deadline, sends escalating Gmail reminders, reshapes Google Calendar, and automatically publishes a configured photo and caption to our own Instagram-style website when the deadline expires. Verified homework submission before expiry prevents publication. Real Instagram is not connected.
 
-Built for Battle of the Schools by Sharma Ji Ka Bot: Vian Dhanda, Asad Ullah Qureshi and Aditya Vignesh Kumar.
+Built for Battle of the Schools by Vian Dhanda, Asad Ullah Qureshi and Aditya Vignesh Kumar, with AI coding and design assistance.
 
-## Current live run and presentation
+## Final implementation and demo
 
-The private Steel dashboard is at http://127.0.0.1:3004/. It uses Vian’s exported Claude design. **Replay 18h in 30s** is an isolated presentation animation; it never sends real mail or changes Calendar. The live six-hour overnight run started September 12 at 19:39 Toronto and ends September 13 at 01:39 Toronto. Two real study blocks and a new Gmail reminder have been verified; completion of the six-hour run is still pending. See `artifacts/STEEL_HANDOFF.md` for the current evidence and operating details.
+- TypeScript, Node.js and Express backend; HTML/CSS/JavaScript frontend.
+- Steel Computer runs the live backend; Google OAuth connects real Gmail and Calendar.
+- OpenRouter generates contextual wording; deterministic rules control escalation.
+- Cloudflare Pages Functions and Workers KV serve the shared public photo feed.
+- Canvas-style replica verifies submission receipts and PDF integrity, not academic correctness.
+- Atomic JSON state, file locks and an action journal protect recovery.
+
+Public feed: https://amma-instagram-vian.pages.dev/
+
+The private dashboard at http://127.0.0.1:3004/ uses a local SSH relay to Steel and is not a public dashboard. The replacement Steel computer successfully completed a one-minute real-time verification run on September 13: two Gmail sends and automatic publication were confirmed, with no pending actions. The original six-hour overnight run remains preserved on a computer that failed to resume; completion of that run is not claimed.
+
+**Replay 18h in 30s** remains an isolated presentation animation. It cannot send email, modify Calendar, or publish a photo. Video assets are in `artifacts/teammate-video/`.
 
 ## Homework verification
 
-Click **Preview homework check** on AMMA to open the Canvas-style presentation. **Reset presentation** shows a missing submission; **Submit example PDF** saves and verifies the included sample without ending the overnight run. The live **Mark work done** button now requires a PDF submission at `/canvas/assignment` before it restores Calendar. This verifies submission status and file integrity in the replica, not grades or a real university account.
+Click **Preview homework check** on AMMA to open the Canvas-style presentation. **Reset presentation** shows a missing submission; **Submit example PDF** saves and verifies the included sample without ending the live run. The live **Mark work done** button now requires a PDF submission at `/canvas/assignment` before it restores Calendar. This verifies submission status and file integrity in the replica, not grades or a real university account.
 
 ## Run the mock Instagram demo
 
@@ -86,44 +97,25 @@ The EE test requires Playwright Chromium or installed macOS Chrome. `npx tsx src
 - [Mock rehearsal video](artifacts/AMMA_mock_rehearsal.webm)
 - [Detailed setup, recovery and current verification status](UTWAT_Master_doc.md)
 
-Verified September 12: all local suites and full offline escalation/release pass; a real Google email and temporary Calendar event create/rename/restore/delete check passed. OpenRouter generation succeeded using a free model. Steel Browser launched successfully. Local mock composition, simulated sharing and cancellation are implemented and tested. Steel Computer beta is activated; the cloud Node simulation passed and a checkpoint reached ready. Two restore attempts failed with a beta capacity error. Both Chromium builds crash with SIGTRAP, so browser restoration remains unverified. The local 18-hour endurance test is running with offline/mock services. Real Instagram authentication/compose remains unverified. Devpost work is deferred by the team.
+## Automatic website publication
 
-## Hosted Instagram-style demo
+See `deploy/public-feed/README.md` and `wrangler.jsonc` for the Pages/KV deployment. Set `AMMA_PUBLIC_POSTING=true`, `AMMA_PUBLIC_FEED_URL`, and a private `AMMA_PUBLISH_TOKEN` matching the deployed `PUBLISH_TOKEN` secret. Set `HOSTAGE_PHOTO` to your own JPEG/PNG under 5 MB. Keep real Instagram `AUTO_SEND=false`; website publication is a separate integration.
 
-Public Cloudflare Pages deployment: https://amma-instagram-vian.pages.dev
+The backend publishes once per deadline. A receipt confirms the public post; uncertain requests stop for reconciliation. KV propagation can briefly delay visibility. Completing work after publication does not retract an existing public post. Public image URLs are tied to post IDs to prevent mismatched cached photos.
 
-Cloudflare project: `amma-instagram-vian`. Deployed by direct upload of `index.html` and `photo.jpg` on the free plan. No Functions, paid plan, custom domain or billing setup. This public static demo keeps simulated posts in each visitor’s browser. Deployment success, the live page, and the loaded photo were verified in Chrome on September 12, 2026. Re-upload the standalone assets to this existing project for updates.
-
-Alternative private deployment: https://amma-instagram-vian.ironyman.chatgpt.site
-
-The hosted mock follows the supplied dark Instagram desktop reference and supports a compose dialog, editable demo caption, local simulated sharing, likes, comments, saves and follow toggles. It has no real Instagram connection. The hosted draft is stored in that browser only; it is separate from the local AMMA loop. Sites usage is included within existing plan-specific public-beta limits; no paid APIs, domain, database or billing purchase was added.
-
-Hosted source is in `/Users/viandhanda/amma-instagram-site`; its `.openai/hosting.json` owns the existing Site registration. Reuse that registration for updates. The local loop uses `src/insta/mock.html` with its existing mock API. For the standalone deployment, that same HTML has `window.AMMA_STANDALONE=true` inserted before the application script and uses the selected photo as `dist/photo.jpg`. Credentials and AMMA runtime state are excluded. The rehearsal video was regenerated after this visual redesign and project rename.
-
-## Steel Computer beta and endurance run
-
-Current evidence and exact recovery commands: [Steel handoff](artifacts/STEEL_HANDOFF.md). The cloud computer is paused, preserving memory and disk. Only included credits were used; no billing or credit purchase was added.
-
-The local real-clock run started September 12, 2026 at 18:36 Toronto and reaches its deadline September 13 at 12:36. Keep this Mac awake and its lid open for the test. Its progress is in ignored `photos/overnight-receipt.json`; the process logs to `photos/overnight.log`. It uses offline Calendar/email and the mock, then automatically checks release/undo. It has not finished yet. Start a fresh run with `node --import tsx src/deploy/overnight.ts`; the script refuses to overwrite existing run evidence.
-
-## Live agent running on Steel Computer
-
-On September 12 at 18:56 Toronto, the real agent started on Steel Computer `cmp_036435grwqp7td6fcv3dsz9tzwjmv` (1 vCPU, 1 GiB). The first real Gmail reminder succeeded; Calendar read succeeded; free OpenRouter wording generated. Instagram uses the server-side mock, so Chromium is not needed in the cloud. The source, Node runtime, dashboard, mock state, photo and live recovery journal all run in Steel.
-
-Open **http://127.0.0.1:3004** on this Mac. This port is a private SSH relay to the cloud dashboard, not a locally executing agent and not the public Cloudflare mock. It shows `Steel Computer · Live Google · Mock Instagram`. **Mark work done & restore calendar** performs release on the cloud agent. It never presses real Instagram Share.
-
-Deadline: **September 13, 12:56 Toronto**. Steel's documented maximum run window is eight hours. The bounded `cloud-watch.cjs` controller on this Mac checks once per minute and resumes the same paused computer; it never restores a clone or repeats Google actions. It stops issuing resumes 30 minutes after the deadline, with a maximum of four resume attempts. Automatic cloud pause remains enabled. Keep the Mac open and connected for the viewer and resume checks. The cloud agent continues independently while its current run window is active. Resume success at future windows has not yet been verified.
-
-Private local status files: `photos/cloud-live-deployment.json`, `photos/cloud-watch-receipt.json`. Cloud state/log: `/work/amma/photos/cloud-live-state.json`, `/work/amma/photos/cloud-live.log`. The local endurance test remains separate and simulated.
-
-Reconnect the private viewer using the existing local Steel credential:
+Run a short **real public posting** demonstration only when you intend to publish the configured photo:
 
 ```sh
-node src/deploy/cloud-view.cjs cmp_036435grwqp7td6fcv3dsz9tzwjmv
+AMMA_OFFLINE=false npx tsx src/scripts/public-deadline-demo.ts 30
 ```
 
-Only one viewer can listen on port 3004. The relay rejects unexpected Host/Origin headers and carries only the dashboard/mock routes over authenticated SSH. There is no public tunnel exposing your Google activity. Google and OpenRouter credentials live in a private cloud `.env`; the Steel API key stays on the Mac. Do not clone the live run's state into another active agent. The previous offline checkpoint computer remains paused for independent restore experiments.
+Additional checks:
 
-## Instagram interface update
+```sh
+AMMA_PUBLIC_POSTING=false npx tsx src/scripts/verify.ts
+npx tsx src/scripts/verify-public-post.ts
+node src/scripts/verify-feed.mjs
+npx tsx src/scripts/verify-canvas.ts
+```
 
-The feed and composer now follow the supplied Instagram desktop reference: narrow icon rail, 4:5 post, wider suggestion gutter, account row and a header-level Share action. Visible mock/demo labels were removed at Vian's request. Open **Create (+)** to review the prepared caption and photo. The visible route is `/instagram`; the old route remains a compatibility alias. Public Cloudflare and the private Steel dashboard both use this interface. The underlying Instagram behavior remains a replica with locally stored posts; it does not connect to Instagram.
+Photos, credentials and runtime receipts are deliberately excluded from Git. Supply your own `.env` and photo to reproduce live behavior. Historical slide decks and handoff notes in `artifacts/` may describe earlier human-controlled posting; the README and current source describe the final implementation.

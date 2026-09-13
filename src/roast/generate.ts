@@ -20,7 +20,7 @@ async function completion(kind: string, data: object, limits: Record<string, num
     headers: { Authorization: `Bearer ${config.openRouterApiKey}`, "Content-Type": "application/json", "X-Title": "AMMA" },
     body: JSON.stringify({ model: process.env.OPENROUTER_MODEL || "nvidia/nemotron-3-super-120b-a12b:free", temperature: 0.8,
       max_tokens: 900, reasoning: { effort: "none" }, provider: { require_parameters: true },
-      messages: [{ role: "system", content: VOICE }, { role: "user", content: JSON.stringify({ task: kind, ...data, limits }) }],
+      messages: [{ role: "system", content: process.env.AMMA_PUBLIC_POSTING === "true" ? VOICE.replace("armed says the compose window is loaded and awaits a human; fired says the deadline passed but NOTHING was posted;", "armed says the photo will publish to our website at the deadline; fired says the deadline has passed;").replace("The photo is never posted automatically.", "The photo is automatically published to our own website at the deadline, never to real Instagram. Do not claim success unless the context includes a publication receipt.") : VOICE }, { role: "user", content: JSON.stringify({ task: kind, ...data, limits }) }],
       response_format: { type: "json_schema", json_schema: { name: "amma_copy", strict: true,
         schema: { type: "object", properties, required: Object.keys(limits), additionalProperties: false } } },
     }),
@@ -57,6 +57,10 @@ export async function generateEmail(stage: Stage, hoursLeft: number, context: st
     fired: ["Deadline passed. Your move.", "Nothing has been posted. The compose window is waiting for a human. You can still mark the work done."],
     released: ["Proud of you.", "You did the work. Your calendar is restored and local drafts are cleared. Go eat something. Close any remaining compose window without posting."],
   };
+  if(process.env.AMMA_PUBLIC_POSTING === "true"){
+    lines.armed=["Last chance, beta.","Your photo and caption will publish to our website when time runs out. Verify your submission before the deadline."];
+    lines.fired=["Deadline missed. Accountability delivered.","The deadline has passed. See the publication receipt below."];
+  }
   const facts = clean(context, 6000);
   const result = await generate("email", { stage, hoursLeft: h, context: facts }, { subject: 160, body: 2400 }, { subject: lines[stage][0], body: lines[stage][1] });
   // Preserve the loop's exact caption preview/diff and live URL, even if the model omits them.
@@ -70,6 +74,7 @@ export async function generateEventTitle(originalTitle: string, hoursLeft: numbe
 }
 export async function generateCaption(stage: Stage, context: string): Promise<string> {
   if (stage === "released") return "";
+  if(process.env.AMMA_PUBLIC_POSTING === "true" && stage === "fired")return "Deadline missed. The textbook waited. The calendar cleared its schedule. Somehow procrastination still won. 📚 — AMMA";
   const lines: Partial<Record<Stage, string>> = {
     calm: "The exam exists. I checked. Now you check the textbook.",
     nudging: "Revision plan: tomorrow. Tomorrow's revision plan: see previous revision plan.",

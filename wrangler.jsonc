@@ -1,0 +1,6 @@
+{
+ "name":"amma-instagram-vian",
+ "pages_build_output_dir":"./dist/public-feed",
+ "compatibility_date":"2026-09-13",
+ "kv_namespaces":[{"binding":"POSTS","id":"8d4b6e0a5aa04ab4bca96b1875576f7b"}]
+}
