@@ -1,0 +1,38 @@
+FINAL ACCURACY PATCHES FOR THE EXISTING DECK / TEAM VIDEO
+
+Keep the name AMMA throughout.
+
+Replace manual-Share claims with:
+“At expiry, AMMA automatically publishes the configured photo and caption to our live Instagram-style website.”
+
+Use the actual thresholds:
+Calm: more than 12 hours remaining.
+Nudging: 12 hours or less.
+Invasive: 6 hours or less.
+Hostile: 2 hours or less.
+Armed: less than 15 minutes.
+Fired: deadline expired.
+Released: verified completion before expiry.
+
+Steel Computer runs the actual Node backend. Gmail and Calendar actions use their APIs; do not describe these as automated browser clicks or claim a successful checkpoint/restore demo.
+
+Show the real Vian_Goat photo in screenshot 02 or on the live website. Old screenshots may show a different image.
+
+The 18-hour-in-30-second timer is an isolated replay. It does not send reminders, modify Calendar or publish. A separate one-minute real-time cloud test confirmed two Gmail sends and automatic public publication. Calendar blocks were verified separately.
+
+Do not say the six-hour overnight run completed. The original computer failed to resume.
+
+Canvas is a demo replica. AMMA verifies the current assignment/deadline receipt and PDF integrity. It does not grade homework, determine correctness or access the real university account.
+
+Google Gmail/Calendar are real integrations. Instagram is our own replica website, with actual public publication. Avoid “posts to Instagram.”
+
+Replace screenshot placeholders with this pack's numbered images. The Canvas image may show a missing submission; it is not proof of a successful completion check.
+
+Suggested 3-minute edit:
+0:00–0:20 Problem and AMMA's promise.
+0:20–0:45 Dashboard and real Gmail/Calendar integration.
+0:45–1:15 30-second accelerated replay, clearly labeled.
+1:15–1:45 Canvas submission flow, explaining receipt/integrity checks.
+1:45–2:15 Live public photo post and deadline consequence.
+2:15–2:40 Steel Computer + backend + Cloudflare architecture.
+2:40–3:00 What worked, prototype boundaries, closing.

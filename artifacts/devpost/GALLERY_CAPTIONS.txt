@@ -1,0 +1,8 @@
+01-amma-dashboard.png
+AMMA's live dashboard: the Steel-hosted deadline agent's current state and action history.
+
+02-live-public-post.png
+The consequence is real: the configured photo and caption published to our own public Instagram-style website. This is not Instagram's service.
+
+03-canvas-assignment.png
+Our Canvas-style assignment interface. Completion requires a matching submission receipt and PDF integrity checks; it is not an academic correctness check.

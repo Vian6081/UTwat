@@ -1,0 +1,34 @@
+AMMA — DEVPOST HANDOFF
+Prepared September 13, 2026.
+
+1. Open https://battle-of-the-schools.devpost.com/ and sign into the team's Devpost account.
+2. Use the team's existing project if one exists. Only one submission per team.
+3. Paste the fields from DEVPOST_COPY.md. Choose AMMA as the project name.
+4. Add all actual team members through their Devpost profiles. Known names: Vian Dhanda, Asad Ullah Qureshi, Aditya Vignesh Kumar. Vian requested listing these three accounts. Ryan is presenting but currently has no Devpost account; the event asks for all team members, so clarify his status with the organizers. Do not invent profile URLs or contributions.
+5. Add the GitHub repository and live publication website links.
+6. Upload the numbered PNGs in screenshots/ in order. See GALLERY_CAPTIONS.txt.
+7. Add the teammates' public YouTube video (maximum 3 minutes). Test its link while logged out.
+8. Choose Steel.dev Web Agents. Add Steel Computer and Most Unhinged Idea if the form offers those wildcard entries.
+9. Review the rendered submission, save and SUBMIT before 11:00 a.m. Toronto time on September 13. Verify Devpost shows it as submitted, not just saved as a draft.
+10. Confirm the event's separate team-registration requirement is already complete: https://forms.gle/8jDCNgBJJcedAVai6
+
+The browser was logged out during preparation; no Devpost draft has been created or submitted by this prep task. Video and final membership/account details remain for the team.
+
+PUBLIC LINKS
+Repository: https://github.com/Vian6081/UTwat
+Live photo feed: https://amma-instagram-vian.pages.dev/
+Event / submission requirements: https://battle-of-the-schools.devpost.com/
+Rules: https://battle-of-the-schools.devpost.com/rules
+
+DEMO ACCESS
+The public website is the consequence feed, not the full agent dashboard.
+The private dashboard is http://127.0.0.1:3004/ on Vian's Mac through the Steel relay. Do not put this localhost URL in Devpost's public “try it” field.
+The Steel computer currently has a four-hour timeout from approximately 8:47 a.m. Toronto. It may pause around 12:47 p.m.; resume and verify it before the afternoon presentation.
+
+SLIDES
+You already have a slide deck. Apply FINAL_SLIDE_AND_VIDEO_NOTES.txt before using it: older versions describe manual sharing and outdated thresholds. Screenshots in this pack show the final implementation. Slides are optional in the Devpost requirements; if entered for the slide prize, provide a publicly viewable deck link.
+
+VIDEO
+Your teammates are producing the final YouTube upload. This pack does not create or upload a new video.
+Existing timer asset: Downloads/AMMA_timer_30s_1080p.mp4
+Label the timer sequence “18-hour replay — 30 seconds”; show the live public post separately.

@@ -93,7 +93,8 @@ npx tsx src/scripts/verify-mock.ts
 
 The EE test requires Playwright Chromium or installed macOS Chrome. `npx tsx src/scripts/record-demo.ts` records an isolated offline run including the mock compose preview and requires Playwright FFmpeg (`npx playwright install ffmpeg`).
 
-- [Editable slides with current demo notes](artifacts/The_Deadline_Hostage.pptx) and [PDF](artifacts/The_Deadline_Hostage.pdf)
+- [Historical editable slides](artifacts/The_Deadline_Hostage.pptx) and [PDF](artifacts/The_Deadline_Hostage.pdf)
+- [Devpost submission copy and handoff](artifacts/devpost/START_HERE.txt)
 - [Mock rehearsal video](artifacts/AMMA_mock_rehearsal.webm)
 - [Detailed setup, recovery and current verification status](UTWAT_Master_doc.md)
 

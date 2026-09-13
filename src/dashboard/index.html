@@ -22,7 +22,7 @@
     <div style="display:flex; align-items:center; gap:10px; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.1em; color:#77776F; text-transform:uppercase;">
       <span style="padding:5px 9px; border:1px solid #232327; border-radius:4px;"><span data-bind="uptime"></span></span>
       <span style="padding:5px 9px; border:1px solid #232327; border-radius:4px;"><span id="connection" role="status">Connecting</span></span>
-      <span style="padding:5px 9px; border:1px solid #232327; border-radius:4px; color:var(--accent);">Human controls Share</span>
+      <span style="padding:5px 9px; border:1px solid #232327; border-radius:4px; color:var(--accent);" data-bind="postingLabel">Publication mode</span>
     </div>
   </header>
 
@@ -67,7 +67,7 @@
           <span>rewritten <span data-bind="draftAge"></span></span>
         </div>
         <p style="margin:0; font-size:clamp(20px,2.1vw,30px); line-height:1.34; letter-spacing:-0.015em; text-wrap:pretty; color:#F2EFE9;"><span data-bind="caption" id="caption"></span></p>
-        <div style="margin-top:14px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#5C5C57;">Instagram draft · final Share stays with you<br><a id="viewer" hidden target="_blank" rel="noopener noreferrer">Open Instagram ↗</a></div>
+        <div style="margin-top:14px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#5C5C57;"><span data-bind="postingNote">Publication status</span><br><a id="viewer" hidden target="_blank" rel="noopener noreferrer">Open Instagram ↗</a></div>
       </div>
 
       <div>
@@ -109,7 +109,7 @@
       <button id="notifications" style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; background:transparent; color:#F2EFE9; border:1px solid #2A2A2E; padding:10px 16px; cursor:pointer;" style-hover="border-color:#4A4A50">Enable notifications</button>
       <button id="homework-demo" style="font:11px 'IBM Plex Mono',monospace;background:transparent;color:#9A9A92;border:1px solid #2A2A2E;padding:10px 16px;cursor:pointer">PREVIEW HOMEWORK CHECK</button><button id="mark-done" hidden style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; background:transparent; color:#9A9A92; border:1px solid #2A2A2E; padding:10px 16px; cursor:pointer;" style-hover="color:#F2EFE9;border-color:#4A4A50">Mark work done · restore calendar</button>
     </div>
-    <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#5C5C57;"><span data-bind="speedLabel"></span> · it does not press send</div>
+    <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#5C5C57;"><span data-bind="speedLabel"></span></div>
   </footer>
 
   <div style="position:fixed; top:22px; right:22px; width:min(370px,calc(100vw - 44px)); display:flex; flex-direction:column; gap:10px; z-index:50; pointer-events:none;">
