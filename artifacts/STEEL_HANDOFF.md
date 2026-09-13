@@ -74,3 +74,14 @@ Live Google verification at 19:40 Toronto confirmed two STUDY BLOCK events: 20:3
 A six-hour start enters the invasive stage. The loop now catches up study-block creation when a run starts in invasive or hostile, retaining its normal idempotency and undo records. Reminders run hourly in invasive and every twenty minutes in hostile, plus stage-transition messages. Share remains human-controlled. Use the private dashboard at http://127.0.0.1:3004/ to inspect activity; do not mark real work done during presentation unless the session should actually be released.
 
 Validation: TypeScript, runtime recovery/cadence (including six-hour catch-up and no duplicate blocks), Google/OAuth unit checks, desktop/mobile dashboard checks, and the complete 30-second replay with zero POST requests and unchanged state passed.
+
+
+## Canvas submission verification - September 12 evening
+
+The Canvas-style dashboard, course menu and assignment page are deployed on the same Steel computer. AMMA's work-complete control now checks the current assignment's saved PDF submission and refuses release when absent, stale or changed. It checks submission status, not academic correctness; no university Canvas account is connected.
+
+For judges, click **Preview homework check**, then **Reset presentation** to show the rejected state, then **Submit example PDF** to show a real saved submission and passing checks. This uses separate presentation files and does not release the live Google session. The real work-complete button still requires a submission at `/canvas/assignment` before restoring Calendar. The CLI enforces the same check for live runs; explicitly offline rehearsals retain their release command.
+
+Live verification confirmed HTTP 409 for a missing submission, a successful isolated sample upload and verification, and the unchanged overnight deadline `2026-09-13T05:39:35.416Z`. At verification, three Gmail sends and two Calendar blocks were present, with zero pending actions. The private viewer was restored with process 36331; cloud app process 7987. These are diagnostic snapshots, not stable identifiers.
+
+Sample document: `output/pdf/AMMA_sample_homework.pdf`. Test: `npx tsx src/scripts/verify-canvas.ts`. Desktop, course drawer, assignment, mobile and verification screenshots are under `artifacts/canvas-*.png`.

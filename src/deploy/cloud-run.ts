@@ -1,6 +1,7 @@
 // Cloud runtime: live Google/OpenRouter, mock Instagram, and a private dashboard.
 import * as fs from 'node:fs';
 import express from 'express';
+import {markDoneAfterCanvasCheck} from '../canvas/server';
 import { config } from '../config';
 import { createDashboard } from '../dashboard/server';
 import { tick } from '../loop';
@@ -20,7 +21,7 @@ async function main() {
   app.get('/api/runtime',(_req,res)=>res.json({deployment:'Steel Computer',hostname:process.env.HOSTNAME,pid:process.pid,mode:'live',instagramMode:'mock',failure,startedAt}));
   app.post('/api/done',express.json(),async(req,res)=>{
     if(req.headers.origin!==`http://${req.headers.host}` || !req.is('application/json')){res.sendStatus(403);return;}
-    try{await withStateLock(async()=>{const s=loadState();s.done=true;saveState(s);});const s=await tick();failure=null;res.json({stage:s.stage,done:s.done});}
+    try{const result=await markDoneAfterCanvasCheck();if(!result.accepted){res.status(409).json({error:'Submit your assignment in Canvas before marking work done.',verification:result.verification});return;}const s=await tick();failure=null;res.json({stage:s.stage,done:s.done});}
     catch{failure='Release needs attention; inspect the recovery journal';res.status(503).json({error:failure});}
   });
   const startedAt=new Date().toISOString();

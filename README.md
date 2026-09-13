@@ -8,6 +8,10 @@ Built for Battle of the Schools by Sharma Ji Ka Bot: Vian Dhanda, Asad Ullah Qur
 
 The private Steel dashboard is at http://127.0.0.1:3004/. It uses Vian’s exported Claude design. **Replay 18h in 30s** is an isolated presentation animation; it never sends real mail or changes Calendar. The live six-hour overnight run started September 12 at 19:39 Toronto and ends September 13 at 01:39 Toronto. Two real study blocks and a new Gmail reminder have been verified; completion of the six-hour run is still pending. See `artifacts/STEEL_HANDOFF.md` for the current evidence and operating details.
 
+## Homework verification
+
+Click **Preview homework check** on AMMA to open the Canvas-style presentation. **Reset presentation** shows a missing submission; **Submit example PDF** saves and verifies the included sample without ending the overnight run. The live **Mark work done** button now requires a PDF submission at `/canvas/assignment` before it restores Calendar. This verifies submission status and file integrity in the replica, not grades or a real university account.
+
 ## Run the mock Instagram demo
 
 ```sh

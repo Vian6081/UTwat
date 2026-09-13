@@ -1,4 +1,5 @@
 import express from "express";
+import {canvasRouter} from "../canvas/server";
 import * as path from "node:path";
 import * as fs from "node:fs";
 import { now } from "../clock";
@@ -15,9 +16,10 @@ export function createDashboard() {
     res.setHeader("Content-Security-Policy","default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'");
     next();
   });
+  app.use("/canvas",canvasRouter());
   app.use("/instagram",mockRouter());
   app.use("/mock-instagram",mockRouter());
-  for(const file of ["app.js","replay-data.js","fonts.css"])app.get(`/dashboard/${file}`,(_req,res)=>res.sendFile(path.resolve(__dirname,file)));
+  for(const file of ["app.js","replay-data.js","fonts.css","verification.css","verification.js"])app.get(`/dashboard/${file}`,(_req,res)=>res.sendFile(path.resolve(__dirname,file)));
   app.get("/",(_req,res)=>res.sendFile(path.resolve(__dirname,"index.html")));
   app.get("/api/state",(_req,res)=>{
     try {
